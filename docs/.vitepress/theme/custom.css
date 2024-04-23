@@ -1,0 +1,13 @@
+:root {
+  --modeller-brown-light: #b38c6c;
+  --modeller-brown-dark: #ac8464;
+  --modeller-brown: #ac8464;
+  --modeller-brown-soft: rgba(196, 164, 132, 0.14);
+
+  --vp-c-brand-1: var(--modeller-brown);
+  --vp-c-brand-2: var(--modeller-brown-dark);
+  --vp-c-brand-3: var(--modeller-brown-light);
+  --vp-c-brand-soft: var(--modeller-brown-soft);
+  --vp-home-hero-name-color: var(--vp-c-brand-1); 
+
+}
