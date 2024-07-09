@@ -130,26 +130,26 @@ public static partial class Parser
     private static Parser<char, int> DigitChar(int @base)
         => @base <= 10
             ? Parser<char>.Token(c => c >= '0' && c < '0' + @base)
-                .Select(c => GetDigitValue(c))
+                .Select(GetDigitValue)
             : Parser<char>
                 .Token(c =>
                     (c >= '0' && c <= '9')
                     || (c >= 'A' && c < 'A' + @base - 10)
                     || (c >= 'a' && c < 'a' + @base - 10)
                 )
-                .Select(c => GetLetterOrDigitValue(c));
+                .Select(GetLetterOrDigitValue);
 
     private static Parser<char, long> DigitCharLong(int @base)
         => @base <= 10
             ? Parser<char>.Token(c => c >= '0' && c < '0' + @base)
-                .Select(c => GetDigitValueLong(c))
+                .Select(GetDigitValueLong)
             : Parser<char>
                 .Token(c =>
-                    (c >= '0' && c <= '9')
+                    c is >= '0' and <= '9'
                     || (c >= 'A' && c < 'A' + @base - 10)
                     || (c >= 'a' && c < 'a' + @base - 10)
                 )
-                .Select(c => GetLetterOrDigitValueLong(c));
+                .Select(GetLetterOrDigitValueLong);
 
     private static int GetDigitValue(char c) => c - '0';
 

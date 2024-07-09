@@ -6,13 +6,13 @@ namespace Modeller.ParserTests;
 public class FlagParseTests
 {
     [Fact]
-    public void EnumValueLine_ShouldMatch()
+    public void FlagValueLine_ShouldMatch()
     {
         const string input = "WEDNESDAY: 4, description(\"Wednesday\")";
-        // var result = EntityParser.FlagValueSyntax.ParseOrThrow(input);
-        // result.Name.Value.Should().Be("WEDNESDAY");
-        // result.Value.Should().Be(4);
-        // result.Summary.Value.Should().Be("Wednesday");
+        var result = EntityParser.FlagValueSyntax.ParseOrThrow(input);
+        result.Name.Value.Should().Be("WEDNESDAY");
+        result.Value.Should().Be(4);
+        result.Summary.Value.Should().Be("Wednesday");
     }
     
     [Fact]

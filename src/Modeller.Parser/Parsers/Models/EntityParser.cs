@@ -19,7 +19,9 @@ public static class EntityParser
     private static readonly Parser<char, char> Period = Tok('.');
     private static readonly Parser<char, char> Quote = Tok('"');
     private static readonly Parser<char, string> EntityKeyword = Tok("entity").Labelled("entity keyword");
+    private static readonly Parser<char, string> EndpointKeyword = Tok("endpoint").Labelled("endpoint keyword");
     private static readonly Parser<char, string> EnumKeyword = Tok("enum").Labelled("enum keyword");
+    private static readonly Parser<char, string> FlagKeyword = Tok("flags").Labelled("flag keyword");
 
     private static readonly Parser<char, string>
         DescriptionKeyword = Tok("description").Labelled("description keyword");
@@ -41,6 +43,11 @@ public static class EntityParser
     private static readonly Parser<char, string> FDoubleKeyword = Tok("double");
     private static readonly Parser<char, string> FLatLongKeyword = Tok("latlong");
     private static readonly Parser<char, string> FPercentageKeyword = Tok("percentage");
+
+    private static readonly Parser<char, string> GetKeyword = Tok("Get");
+    private static readonly Parser<char, string> PostKeyword = Tok("post");
+    private static readonly Parser<char, string> PutKeyword = Tok("put");
+    private static readonly Parser<char, string> DeleteKeyword = Tok("delete");
 
     private static Parser<char, T> Parenthesised<T>(Parser<char, T> parser)
         => parser.Between(LBracket, RBracket);
@@ -70,17 +77,29 @@ public static class EntityParser
             LetterOrDigit.ManyString().Before(Period).Select(s => s)
         ).Labelled("Version");
 
-    internal static readonly Parser<char, VersionedEntityName> EntitySyntax =
+    internal static readonly Parser<char, VersionedName> EntitySyntax =
         from kw in EntityKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
-        select new VersionedEntityName(n, v);
+        select new VersionedName(n, v);
 
-    internal static readonly Parser<char, VersionedEntityName> EnumSyntax =
+    internal static readonly Parser<char, VersionedName> EndpointSyntax =
+        from kw in EndpointKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
+
+    internal static readonly Parser<char, VersionedName> EnumSyntax =
         from kw in EnumKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
-        select new VersionedEntityName(n, v);
+        select new VersionedName(n, v);
+
+    internal static readonly Parser<char, VersionedName> FlagSyntax =
+        from kw in FlagKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
 
     private static readonly Parser<char, string> ClearText =
         Token(c => c != '"')
@@ -113,20 +132,29 @@ public static class EntityParser
         from s in DescriptionSyntax
         select new EnumDetail(n, v, s);
 
-    private static readonly Parser<char, string> UsesOwnerKeyword = Tok("usesOwnerKey");
-    private static readonly Parser<char, string> OwnerKeyword = Tok("owner");
-    private static readonly Parser<char, string> UntenantedKeyword = Tok("untenanted");
+    internal static readonly Parser<char, FlagDetail> FlagValueSyntax =
+        from n in NameIdentifier
+        from colon in Colon
+        from v in UnsignedInt(10).Before(Comma)
+        from s in DescriptionSyntax
+        select new FlagDetail(n, v, s);
+
+    private static readonly Parser<char, string> UsesOwnerKeyword = Tok("usesOwnerKey").Labelled("usesOwnerKey keyword");
+    private static readonly Parser<char, string> OwnerKeyword = Tok("owner").Labelled("owner keyword");
+    private static readonly Parser<char, string> OperationKeyword = Tok("operation").Labelled("operation keyword");
+    private static readonly Parser<char, string> UntenantedKeyword = Tok("untenanted").Labelled("untenanted keyword");
+    private static readonly Parser<char, string> PathKeyword = Tok("path").Labelled("path keyword");
 
     private static readonly Parser<char, string> TenantKeyword =
         Try(
             Comma.Then(Tok("tenantkey").Select(_ => "tenantkey"))
         ).Labelled("Tenant");
 
-    internal static readonly Parser<char, VersionedEntityName> EntityKeySyntax =
+    internal static readonly Parser<char, VersionedName> EntityKeySyntax =
         from kw in EntityKeyKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
-        select new VersionedEntityName(n, v);
+        select new VersionedName(n, v);
 
     private static readonly Parser<char, OwnerKeyType> KeyOwnerSyntax =
         from kw in OneOf(OwnerKeyword, UsesOwnerKeyword, UntenantedKeyword).ManyString()
@@ -151,6 +179,37 @@ public static class EntityParser
         from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
         select new EntityBuilder(en, desc, fields);
 
+    private static readonly Parser<char, OwnerDetail> OwnerSyntax =
+        from kw in OwnerKeyword
+        from n in Parenthesised(NameIdentifier)
+        select new OwnerDetail(n);
+    
+    private static readonly Parser<char, string> OperationSyntax =
+        from kw in OperationKeyword
+        from op in Parenthesised(OneOf(GetKeyword, PostKeyword, PutKeyword, DeleteKeyword).Between(Quote)).Labelled("Operation Type")
+        select op;
+
+    private static readonly Parser<char, string> PathSyntax =
+        PathKeyword
+            .Then(Parenthesised(ClearText.Select(s => s)))
+            .Labelled("'path(\"<path>\")'");
+    
+    private static readonly Parser<char, EndpointBodyDetail> EndpointBodySyntax =
+        from op in OperationSyntax.Before(Comma)
+        from pa in PathSyntax.Before(Comma)
+        // from qp in QueryParamsSyntax
+        // from rs in ResponseSyntax
+        select new EndpointBodyDetail(op, pa);
+    
+    private static readonly Parser<char, EndpointBuilder> EndpointParserRule =
+        from c in SkipComment
+        from ep in EndpointSyntax
+        from co in Colon
+        from o in OwnerSyntax.Before(Comma)
+        from desc in DescriptionSyntax
+        from body in EndpointBodySyntax.Between(LBrace, RBrace)
+        select new EndpointBuilder(ep,o,desc);
+    
     private static readonly Parser<char, EnumBuilder> EnumParserRule =
         from c in SkipComment
         from en in EnumSyntax
@@ -158,6 +217,14 @@ public static class EntityParser
         from desc in DescriptionSyntax
         from values in EnumValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
         select new EnumBuilder(en, desc, values);
+
+    private static readonly Parser<char, FlagBuilder> FlagParserRule =
+        from c in SkipComment
+        from en in FlagSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        from values in FlagValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        select new FlagBuilder(en, desc, values);
 
     public static EntityBuilder ParseEntity(string input)
         => EntityParserRule.ParseOrThrow(input);
@@ -167,4 +234,10 @@ public static class EntityParser
 
     public static EnumBuilder ParseEnum(string input)
         => EnumParserRule.ParseOrThrow(input);
+
+    public static FlagBuilder ParseFlag(string input)
+        => FlagParserRule.ParseOrThrow(input);
+
+    public static EndpointBuilder ParseEndpoint(string input)
+        => EndpointParserRule.ParseOrThrow(input);
 }
