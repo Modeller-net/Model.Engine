@@ -145,7 +145,7 @@ public class EntityParseTests
                                    }
                                    """;
 
-        var entity = EntityParser.ParseEntity(fileContent);
+        var entity = (EntityBuilder)EntityParser.ParseEntity(fileContent);
 
         entity.Name.Name.ToString().Should().Be("DeterminationCloseInfo");
         entity.Name.Version.Value.Should().Be("dev10");

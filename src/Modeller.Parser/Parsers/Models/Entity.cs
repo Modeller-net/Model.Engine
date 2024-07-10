@@ -16,11 +16,13 @@ public record FlagDetail(NameType Name, int Value, NonEmptyString Summary);
 
 public record OwnerKeyType(string Type, NameType? Name = null);
 
-public record EnumBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<EnumDetail> Enums);
+public abstract record Builder;
 
-public record FlagBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FlagDetail> Enums);
+public record EnumBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<EnumDetail> Enums) : Builder;
 
-public record EntityBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields);
+public record FlagBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FlagDetail> Enums) : Builder;
+
+public record EntityBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;
 
 public record CommandDetail(NameType Name);
 
@@ -32,6 +34,6 @@ public record EndpointBodyDetail(string Operation, string Path);
 
 public record OwnerDetail(NameType Name);
 
-public record EndpointBuilder(VersionedName Name, OwnerDetail Owner, NonEmptyString Summary);
+public record EndpointBuilder(VersionedName Name, OwnerDetail Owner, NonEmptyString Summary) : Builder;
 
-public record EntityKeyBuilder(VersionedName Name, Maybe<OwnerKeyType> Key, bool IsTenant, NonEmptyString Summary, IEnumerable<FieldDetail> Fields);
+public record EntityKeyBuilder(VersionedName Name, Maybe<OwnerKeyType> Key, bool IsTenant, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;

@@ -226,18 +226,13 @@ public static class EntityParser
         from values in FlagValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
         select new FlagBuilder(en, desc, values);
 
-    public static EntityBuilder ParseEntity(string input)
-        => EntityParserRule.ParseOrThrow(input);
+    public static readonly Func<string, Builder> ParseEntity = input => EntityParserRule.ParseOrThrow(input);
 
-    public static EntityKeyBuilder ParseEntityKey(string input)
-        => EntityKeyParserRule.ParseOrThrow(input);
+    public static readonly Func<string, Builder> ParseEntityKey= input => EntityKeyParserRule.ParseOrThrow(input);
 
-    public static EnumBuilder ParseEnum(string input)
-        => EnumParserRule.ParseOrThrow(input);
+    public static readonly Func<string, Builder> ParseEnum = input => EnumParserRule.ParseOrThrow(input);
 
-    public static FlagBuilder ParseFlag(string input)
-        => FlagParserRule.ParseOrThrow(input);
+    public static readonly Func<string, Builder> ParseFlag = input => FlagParserRule.ParseOrThrow(input);
 
-    public static EndpointBuilder ParseEndpoint(string input)
-        => EndpointParserRule.ParseOrThrow(input);
+    public static readonly Func<string, Builder> ParseEndpoint = input => EndpointParserRule.ParseOrThrow(input);
 }

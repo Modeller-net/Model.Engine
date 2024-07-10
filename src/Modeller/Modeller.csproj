@@ -28,11 +28,13 @@
         </PackageReference>
         <PackageReference Include="Spectre.Console.Cli" Version="0.48.1-preview.0.20" />
         <PackageReference Include="Spectre.Console.Json" Version="0.48.1-preview.0.20" />
+        <PackageReference Include="System.Reactive" Version="5.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\Generator\Generator.csproj" />
+      <ProjectReference Include="..\Modeller.Parser\Modeller.Parser.csproj" />
       <ProjectReference Include="..\Names\Names.csproj" />
     </ItemGroup>
 

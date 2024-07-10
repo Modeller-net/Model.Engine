@@ -2,14 +2,6 @@
 
 public sealed class WatchSettings : LogCommandSettings
 {
-    [CommandArgument(0, "<template>")]
-    [Description("Name of the template to use.")]
-    public string TemplateName { get; init; } = null!;
-
-    [CommandArgument(1, "<definition>")]
-    [Description("Name of the definition to use.")]
-    public string DefinitionName { get; init; } = null!;
-
     [CommandOption("--templates")]
     [Description("Folder where the templates are located.")]
     public string? TemplateFolder { get; init; } = Settings.DefaultTemplateFolder.FullName;

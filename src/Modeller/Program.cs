@@ -20,6 +20,7 @@ services.AddSingleton(_ =>
 services.AddSingleton<ISettingsService, SettingsService>();
 services.AddSingleton<ILoader<Settings>, JsonSettingsLoader>();
 services.AddSingleton<IDefinitions, Definitions>();
+services.AddSingleton<FileSystemMonitor>();
 
 var registrar = new TypeRegistrar(services);
 var app = new CommandApp(registrar);
@@ -53,7 +54,7 @@ app.Configure(config =>
         .WithExample("definition", "NewBranch", "--definitions", "../src/Modeller.Definitions");
     config.AddCommand<WatchCommand>("watch")
         .WithDescription("Watch for definition changes and generate the output automatically")
-        .WithExample("watch", "CaseDomain", "--definitions", "../src/Modeller.Definitions", "--templates", "../src/Modeller.Templates", "--output", "c:/playschool");
+        .WithExample("watch", "--definitions", "../src/Modeller.Definitions", "--templates", "../src/Modeller.Templates", "--output", "c:/playschool");
 });
 
 return app.Run(args);

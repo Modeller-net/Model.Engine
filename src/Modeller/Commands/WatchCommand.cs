@@ -1,27 +1,82 @@
 ﻿using Modeller.NET.Tool.Core;
+using Modeller.Parsers.Models;
 
 namespace Modeller.NET.Tool.Commands;
 
-internal class WatchCommand(IAnsiConsole console, ILoader<IDefinitionItem> definitionLoader, ILogger<WatchCommand> logger)
-	 : Command<WatchSettings>
+internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
+    : AsyncCommand<WatchSettings>
 {
-	public override int Execute(CommandContext context, WatchSettings settings)
-	{
-		try
-		{
-			//return definitionLoader.Watch(settings) ? 0 : 1;
-			return 0;
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Watch Command - OnExecute");
-			console.MarkupLine($"[red]{ex.Message}[/]");
-			return 1;
-		}
-		finally
-		{
-			logger.LogDebug("Watch Command - complete");
-			console.WriteLine("Watch Output Complete");
-		}
-	}
+    private CancellationTokenSource? _cts;
+
+    public override async Task<int> ExecuteAsync(CommandContext context, WatchSettings settings)
+    {
+        if (!Directory.Exists(settings.DefinitionFolder))
+        {
+            console.MarkupLine($"[bold red]Definition folder '{settings.DefinitionFolder}' does not exist.[/]");
+            return 1;
+        }
+
+        console.MarkupLine("[bold yellow]Starting Modeller watcher...[/]");
+
+        if(_cts is not null) await _cts.CancelAsync();
+        _cts = new CancellationTokenSource();
+
+        var directoryEnumerator = new DirectoryEnumerator();
+        try
+        {
+            await foreach (var file in directoryEnumerator.EnumerateFilesAsync(settings.DefinitionFolder, _cts.Token))
+            {
+                if (_cts.Token.IsCancellationRequested)
+                    break;
+
+                try
+                {
+                    console.MarkupLine($"[bold green]Processing file:[/] [blue]{file}[/]");
+                    Func<string, Builder>? builder = Path.GetExtension(file) switch
+                    {
+                        ".entity" => EntityParser.ParseEntity,
+                        ".enum" => EntityParser.ParseEnum,
+                        ".flag" => EntityParser.ParseFlag,
+                        ".endpoint" => EntityParser.ParseEndpoint,
+                        ".entitykey" => EntityParser.ParseEntityKey,
+                        _ => null
+                    };
+                    if (builder is not null)
+                    {
+                        var content = await File.ReadAllTextAsync(file);
+                        var x = builder(content);
+                    }
+                    else
+                    {
+                        console.MarkupLine($"[red]Unsupported file type: {Path.GetExtension(file)}[/]");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    console.MarkupLine($"[red]{ex.Message}[/]");
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            console.WriteLine("Operation was cancelled");
+        }
+
+        var monitorTask = monitor.MonitorAsync(console, settings.DefinitionFolder, _cts.Token);
+        console.MarkupLine("[bold green]Press [red]Ctrl+C[/] to exit.[/]");
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            _cts?.Cancel();
+        };
+
+        try
+        {
+            monitorTask.Wait();
+        }
+        catch (AggregateException ex) when (ex.InnerExceptions.All(e => e is TaskCanceledException)) { }
+
+        console.MarkupLine("[bold yellow]Watcher Command completed.[/]");
+        return 0;
+    }
 }

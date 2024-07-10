@@ -27,7 +27,7 @@ public class EntityKeyParseTests
                                    {
                                    }
                                    """;
-        var entity = EntityParser.ParseEntityKey(fileContent);
+        var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
         
         entity.Name.Name.Value.Should().Be("DeterminationCloseInfo");
         entity.Name.Version.HasValue.Should().BeFalse();
@@ -51,7 +51,7 @@ public class EntityKeyParseTests
                                            description("the IndigenousStatus identifier")
                                    }
                                    """;
-        var entity = EntityParser.ParseEntityKey(fileContent);
+        var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
         entity.Name.Name.Value.Should().Be("IndigenousStatus");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a IndigenousStatus");
@@ -79,7 +79,7 @@ public class EntityKeyParseTests
                                            description("the OrganisationAddress identifier")
                                    }
                                    """;
-        var entity = EntityParser.ParseEntityKey(fileContent);
+        var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
         entity.Name.Name.Value.Should().Be("OrganisationAddress");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a OrganisationAddress");
@@ -109,7 +109,7 @@ public class EntityKeyParseTests
                                            description("the Organisation identifier")
                                    }
                                    """;
-        var entity = EntityParser.ParseEntityKey(fileContent);
+        var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
         entity.Name.Name.Value.Should().Be("Organisation");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a Organisation");
