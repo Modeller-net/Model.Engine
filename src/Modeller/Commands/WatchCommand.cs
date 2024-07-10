@@ -32,13 +32,15 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
                 try
                 {
                     console.MarkupLine($"[bold green]Processing file:[/] [blue]{file}[/]");
-                    Func<string, Builder>? builder = Path.GetExtension(file) switch
+                    var builder = Path.GetExtension(file) switch
                     {
                         ".entity" => EntityParser.ParseEntity,
+                        ".domain" => EntityParser.ParseDomain,
                         ".enum" => EntityParser.ParseEnum,
                         ".flag" => EntityParser.ParseFlag,
                         ".endpoint" => EntityParser.ParseEndpoint,
-                        ".entitykey" => EntityParser.ParseEntityKey,
+                        ".key" => EntityParser.ParseEntityKey,
+                        ".type" => EntityParser.ParseType,
                         _ => null
                     };
                     if (builder is not null)

@@ -19,6 +19,8 @@ public static class EntityParser
     private static readonly Parser<char, char> Period = Tok('.');
     private static readonly Parser<char, char> Quote = Tok('"');
     private static readonly Parser<char, string> EntityKeyword = Tok("entity").Labelled("entity keyword");
+    private static readonly Parser<char, string> TypeKeyword = Tok("rpc_type").Labelled("rpc type keyword");
+    private static readonly Parser<char, string> DomainKeyword = Tok("domain").Labelled("domain keyword");
     private static readonly Parser<char, string> EndpointKeyword = Tok("endpoint").Labelled("endpoint keyword");
     private static readonly Parser<char, string> EnumKeyword = Tok("enum").Labelled("enum keyword");
     private static readonly Parser<char, string> FlagKeyword = Tok("flags").Labelled("flag keyword");
@@ -39,6 +41,8 @@ public static class EntityParser
     private static readonly Parser<char, string> FsEntityKeyword = Tok("isSingle");
     private static readonly Parser<char, string> FmEntityKeyword = Tok("isMultiple");
     private static readonly Parser<char, string> FIntKeyword = Tok("integer");
+    private static readonly Parser<char, string> FLongKeyword = Tok("long");
+    private static readonly Parser<char, string> FDocumentKeyword = Tok("document");
     private static readonly Parser<char, string> FImageKeyword = Tok("image");
     private static readonly Parser<char, string> FDoubleKeyword = Tok("double");
     private static readonly Parser<char, string> FLatLongKeyword = Tok("latlong");
@@ -58,8 +62,11 @@ public static class EntityParser
                 select NameType.FromString(first + rest))
             .Labelled("Name");
 
+    private static readonly Parser<char, bool> TemporalSyntax =
+        Tok("temporal").Select(_ => true);
+    
     private static readonly Parser<char, AttributeType> KeyValueSyntax =
-        from en in Tok(Letter).ManyString()
+        from en in Tok(OneOf(Letter, Digit, Char('_'))).ManyString()
         from eq in Tok("=").Optional().IgnoreResult()
         from n in LetterOrDigit.ManyString().Optional()
         select new AttributeType(en, n);
@@ -67,7 +74,7 @@ public static class EntityParser
     private static readonly Parser<char, DataTypeDetail> DataTypeSyntax =
         from name in OneOf(FBoolKeyword, FStringKeyword, FDateTimeKeyword, FDateKeyword,
             FTimeKeyword, FDateTimeOffsetKeyword, FByteKeyword, FEnumKeyword, FCurrencyKeyword, FsEntityKeyword,
-            FmEntityKeyword,
+            FmEntityKeyword, FLongKeyword, FDocumentKeyword,
             FIntKeyword, FImageKeyword, FDoubleKeyword, FLatLongKeyword, FPercentageKeyword)
         from attrs in KeyValueSyntax.Separated(Comma).Between(LBracket, RBracket)
         select new DataTypeDetail(name, attrs);
@@ -79,6 +86,18 @@ public static class EntityParser
 
     internal static readonly Parser<char, VersionedName> EntitySyntax =
         from kw in EntityKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
+
+    internal static readonly Parser<char, VersionedName> TypeSyntax =
+        from kw in TypeKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
+
+    internal static readonly Parser<char, VersionedName> DomainSyntax =
+        from kw in DomainKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
@@ -120,10 +139,11 @@ public static class EntityParser
     internal static readonly Parser<char, FieldDetail> FieldSyntax =
         from n in NameIdentifier
         from colon in Colon
-        from dt in DataTypeSyntax
-        from comma in Comma.Labelled("Comma")
+        from dt in DataTypeSyntax.Before(Comma)
         from s in DescriptionSyntax
-        select new FieldDetail(n, dt, s);
+        from c in Comma.Optional()
+        from t in TemporalSyntax.Optional()
+        select new FieldDetail(n, dt, s, t.HasValue);
     
     internal static readonly Parser<char, EnumDetail> EnumValueSyntax =
         from n in NameIdentifier
@@ -179,6 +199,22 @@ public static class EntityParser
         from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
         select new EntityBuilder(en, desc, fields);
 
+    private static readonly Parser<char, TypeBuilder> TypeParserRule =
+        from c in SkipComment
+        from en in TypeSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        select new TypeBuilder(en, desc, fields);
+
+    private static readonly Parser<char, DomainBuilder> DomainParserRule =
+        from c in SkipComment
+        from en in DomainSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        select new DomainBuilder(en, desc, fields);
+
     private static readonly Parser<char, OwnerDetail> OwnerSyntax =
         from kw in OwnerKeyword
         from n in Parenthesised(NameIdentifier)
@@ -227,6 +263,10 @@ public static class EntityParser
         select new FlagBuilder(en, desc, values);
 
     public static readonly Func<string, Builder> ParseEntity = input => EntityParserRule.ParseOrThrow(input);
+
+    public static readonly Func<string, Builder> ParseDomain = input => DomainParserRule.ParseOrThrow(input);
+
+    public static readonly Func<string, Builder> ParseType = input => TypeParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseEntityKey= input => EntityKeyParserRule.ParseOrThrow(input);
 

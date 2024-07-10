@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Modeller.Parsers.Models;
 
 namespace Modeller.NET.Tool.Commands;
 
@@ -42,14 +41,5 @@ public class DirectoryEnumerator
                 yield return file;
             }
         }
-    }
-}
-
-public static class BuilderExtensions
-{
-    public static async Task ProcessFileAsync(this Builder builder, string filePath)
-    {
-        var content = await File.ReadAllTextAsync(filePath);
-        
     }
 }
