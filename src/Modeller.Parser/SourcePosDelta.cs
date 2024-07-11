@@ -97,18 +97,14 @@ public readonly struct SourcePosDelta : IEquatable<SourcePosDelta>, IComparable<
         => !left.Equals(right);
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(Lines, Cols);
+    public override int GetHashCode() 
+        => HashCode.Combine(Lines, Cols);
 
     /// <inheritdoc/>
     public int CompareTo(SourcePosDelta other)
     {
         var lineCmp = Lines.CompareTo(other.Lines);
-        if (lineCmp != 0)
-        {
-            return lineCmp;
-        }
-
-        return Cols.CompareTo(other.Cols);
+        return lineCmp != 0 ? lineCmp : Cols.CompareTo(other.Cols);
     }
 
     /// <summary>Comparison operator.</summary>

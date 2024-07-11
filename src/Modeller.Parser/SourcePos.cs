@@ -104,12 +104,7 @@ public readonly struct SourcePos : IEquatable<SourcePos>, IComparable<SourcePos>
     public int CompareTo(SourcePos other)
     {
         var lineCmp = Line.CompareTo(other.Line);
-        if (lineCmp != 0)
-        {
-            return lineCmp;
-        }
-
-        return Col.CompareTo(other.Col);
+        return lineCmp != 0 ? lineCmp : Col.CompareTo(other.Col);
     }
 
     /// <summary>Comparison operator.</summary>

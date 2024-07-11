@@ -78,19 +78,16 @@ public class Result<TToken, T>
     /// </summary>
     /// <param name="default">The default value.</param>
     /// <returns>The value if <see cref="Success"/> is true, or the specified default value.</returns>
-    public T GetValueOrDefault(T @default) => Success ? _value : @default;
+    public T GetValueOrDefault(T @default) 
+        => Success ? _value : @default;
 
     /// <summary>
     /// Get the value, or return the result of calling the specified function.
     /// </summary>
     /// <param name="value">A function which computes a default value.</param>
     /// <returns>The value if <see cref="Success"/> is true, or the result of calling the specified function.</returns>
-    public T GetValueOrDefault(Func<T> value)
-    {
-		ArgumentNullException.ThrowIfNull(value);
-
-		return Success ? _value : value();
-    }
+    public T GetValueOrDefault(Func<T> value) 
+        => Success ? _value : value();
 
     /// <summary>
     /// Tear down this parse result using a function for the two possible outcomes.
@@ -100,15 +97,8 @@ public class Result<TToken, T>
     /// <param name="success">Called when the result has a value.</param>
     /// <param name="failure">Called when the result does not have a value.</param>
     /// <returns>The result of calling the <paramref name="success"/> or <paramref name="failure"/> function.</returns>
-    public Tu Match<Tu>(Func<T, Tu> success, Func<ParseError<TToken>, Tu> failure)
-    {
-		ArgumentNullException.ThrowIfNull(success);
-		ArgumentNullException.ThrowIfNull(failure);
-
-		return Success
-            ? success(_value)
-            : failure(Error!);
-    }
+    public Tu Match<Tu>(Func<T, Tu> success, Func<ParseError<TToken>, Tu> failure) 
+        => Success ? success(_value) : failure(Error!);
 
     /// <summary>
     /// Project the value contained in the result.
@@ -116,14 +106,8 @@ public class Result<TToken, T>
     /// <param name="selector">A transformation function to apply to the contained value.</param>
     /// <typeparam name="Tu">The type of the resulting value.</typeparam>
     /// <returns>The result of applying the transformation function to the contained value.</returns>
-    public Result<TToken, Tu> Select<Tu>(Func<T, Tu> selector)
-    {
-		ArgumentNullException.ThrowIfNull(selector);
-
-		return Success
-            ? new(selector(_value))
-            : new Result<TToken, Tu>(Error!);
-    }
+    public Result<TToken, Tu> Select<Tu>(Func<T, Tu> selector) 
+        => Success ? new(selector(_value)) : new Result<TToken, Tu>(Error!);
 
     /// <summary>
     /// Projects the value of the result into a result, and flattens the resulting value into a single result.
@@ -144,10 +128,7 @@ public class Result<TToken, T>
     /// <returns>The result of applying <paramref name="selector"/> to the contained value and <paramref name="result"/> to the intermediate values.</returns>
     public Result<TToken, Tr> SelectMany<Tu, Tr>(Func<T, Result<TToken, Tu>> selector, Func<T, Tu, Tr> result)
     {
-		ArgumentNullException.ThrowIfNull(selector);
-		ArgumentNullException.ThrowIfNull(result);
-
-		if (!Success)
+        if (!Success)
         {
             return new(Error!);
         }
@@ -166,19 +147,15 @@ public class Result<TToken, T>
     /// </summary>
     /// <param name="result">A fallback result if this one has an error.</param>
     /// <returns>This result, if <see cref="Success"/> == true, or the result of calling <paramref name="result"/>.</returns>
-    public Result<TToken, T> Or(Func<Result<TToken, T>> result)
-    {
-		ArgumentNullException.ThrowIfNull(result);
-
-		return !Success ? result() : this;
-    }
+    public Result<TToken, T> Or(Func<Result<TToken, T>> result) 
+        => !Success ? result() : this;
 
     /// <summary>
     /// Choose the first successful result.
     /// </summary>
     /// <param name="result">A fallback result if this one has an error.</param>
     /// <returns>This result, if <see cref="Success"/> == true, or <paramref name="result"/>.</returns>
-    public Result<TToken, T> Or(Result<TToken, T> result)
+    public Result<TToken, T> Or(Result<TToken, T> result) 
         => !Success ? result : this;
 
     /// <summary>
@@ -187,8 +164,6 @@ public class Result<TToken, T>
     /// <typeparam name="Tu">The type to cast the contained value to.</typeparam>
     /// <exception cref="InvalidCastException">Thrown when the contained value is not an instance of <typeparamref name="Tu"/>.</exception>
     /// <returns>A result containing this result's value casted to <typeparamref name="Tu"/>.</returns>
-    public Result<TToken, Tu> Cast<Tu>()
-        => Success
-            ? new((Tu)(object)_value!)
-            : new Result<TToken, Tu>(Error!);
+    public Result<TToken, Tu> Cast<Tu>() 
+        => Success ? new((Tu)(object)_value!) : new Result<TToken, Tu>(Error!);
 }

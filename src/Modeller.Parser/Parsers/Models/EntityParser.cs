@@ -10,51 +10,53 @@ public static class EntityParser
     private static Parser<char, T> Tok<T>(Parser<char, T> p) => Try(p).Before(SkipWhitespaces);
     private static Parser<char, char> Tok(char value) => Tok(Char(value));
     private static Parser<char, string> Tok(string value) => Tok(String(value));
-    private static readonly Parser<char, char> LBracket = Tok('(');
-    private static readonly Parser<char, char> RBracket = Tok(')');
-    private static readonly Parser<char, char> LBrace = Tok('{');
-    private static readonly Parser<char, char> RBrace = Tok('}');
+    
+    private static readonly Parser<char, char> BracketLeft = Tok('(');
+    private static readonly Parser<char, char> BracketRight = Tok(')');
+    private static readonly Parser<char, char> BraceLeft = Tok('{');
+    private static readonly Parser<char, char> BraceRight = Tok('}');
     private static readonly Parser<char, char> Colon = Tok(':');
     private static readonly Parser<char, char> Comma = Tok(',');
     private static readonly Parser<char, char> Period = Tok('.');
     private static readonly Parser<char, char> Quote = Tok('"');
-    private static readonly Parser<char, string> EntityKeyword = Tok("entity").Labelled("entity keyword");
-    private static readonly Parser<char, string> TypeKeyword = Tok("rpc_type").Labelled("rpc type keyword");
-    private static readonly Parser<char, string> DomainKeyword = Tok("domain").Labelled("domain keyword");
-    private static readonly Parser<char, string> EndpointKeyword = Tok("endpoint").Labelled("endpoint keyword");
-    private static readonly Parser<char, string> EnumKeyword = Tok("enum").Labelled("enum keyword");
-    private static readonly Parser<char, string> FlagKeyword = Tok("flags").Labelled("flag keyword");
 
-    private static readonly Parser<char, string>
-        DescriptionKeyword = Tok("description").Labelled("description keyword");
+    private static readonly Parser<char, string> ObjectEntityKeyword = Tok("entity").Labelled("entity keyword");
+    private static readonly Parser<char, string> ObjectRpcTypeKeyword = Tok("rpc_type").Labelled("rpc type keyword");
+    private static readonly Parser<char, string> ObjectDomainKeyword = Tok("domain").Labelled("domain keyword");
+    private static readonly Parser<char, string> ObjectEndpointKeyword = Tok("endpoint").Labelled("endpoint keyword");
+    private static readonly Parser<char, string> ObjectEnumKeyword = Tok("enum").Labelled("enum keyword");
+    private static readonly Parser<char, string> ObjectFlagKeyword = Tok("flags").Labelled("flag keyword");
+    private static readonly Parser<char, string> ObjectEntityKeyKeyword = Tok("key").Labelled("key keyword");
 
-    private static readonly Parser<char, string> EntityKeyKeyword = Tok("key").Labelled("key keyword");
-    private static readonly Parser<char, string> FBoolKeyword = Tok("boolean");
-    private static readonly Parser<char, string> FStringKeyword = Tok("string");
-    private static readonly Parser<char, string> FDateTimeKeyword = Tok("datetime");
-    private static readonly Parser<char, string> FDateKeyword = Tok("date");
-    private static readonly Parser<char, string> FTimeKeyword = Tok("time");
-    private static readonly Parser<char, string> FDateTimeOffsetKeyword = Tok("datetimeoffset");
-    private static readonly Parser<char, string> FByteKeyword = Tok("byte");
-    private static readonly Parser<char, string> FEnumKeyword = Tok("isEnum");
-    private static readonly Parser<char, string> FCurrencyKeyword = Tok("currency");
-    private static readonly Parser<char, string> FsEntityKeyword = Tok("isSingle");
-    private static readonly Parser<char, string> FmEntityKeyword = Tok("isMultiple");
-    private static readonly Parser<char, string> FIntKeyword = Tok("integer");
-    private static readonly Parser<char, string> FLongKeyword = Tok("long");
-    private static readonly Parser<char, string> FDocumentKeyword = Tok("document");
-    private static readonly Parser<char, string> FImageKeyword = Tok("image");
-    private static readonly Parser<char, string> FDoubleKeyword = Tok("double");
-    private static readonly Parser<char, string> FLatLongKeyword = Tok("latlong");
-    private static readonly Parser<char, string> FPercentageKeyword = Tok("percentage");
+    private static readonly Parser<char, string> AttributeDescriptionKeyword =
+        Tok("description").Labelled("description keyword");
 
-    private static readonly Parser<char, string> GetKeyword = Tok("Get");
-    private static readonly Parser<char, string> PostKeyword = Tok("post");
-    private static readonly Parser<char, string> PutKeyword = Tok("put");
-    private static readonly Parser<char, string> DeleteKeyword = Tok("delete");
+    private static readonly Parser<char, string> DataTypeBoolKeyword = Tok("boolean");
+    private static readonly Parser<char, string> DataTypeStringKeyword = Tok("string");
+    private static readonly Parser<char, string> DataTypeDateTimeKeyword = Tok("datetime");
+    private static readonly Parser<char, string> DataTypeDateKeyword = Tok("date");
+    private static readonly Parser<char, string> DataTypeTimeKeyword = Tok("time");
+    private static readonly Parser<char, string> DataTypeDateTimeOffsetKeyword = Tok("datetimeoffset");
+    private static readonly Parser<char, string> DataTypeByteKeyword = Tok("byte");
+    private static readonly Parser<char, string> DataTypeEnumKeyword = Tok("isEnum");
+    private static readonly Parser<char, string> DataTypeCurrencyKeyword = Tok("currency");
+    private static readonly Parser<char, string> DataTypeSingleEntityKeyword = Tok("isSingle");
+    private static readonly Parser<char, string> DataTypeMultipleEntityKeyword = Tok("isMultiple");
+    private static readonly Parser<char, string> DataTypeIntKeyword = Tok("integer");
+    private static readonly Parser<char, string> DataTypeLongKeyword = Tok("long");
+    private static readonly Parser<char, string> DataTypeDocumentKeyword = Tok("document");
+    private static readonly Parser<char, string> DataTypeImageKeyword = Tok("image");
+    private static readonly Parser<char, string> DataTypeDoubleKeyword = Tok("double");
+    private static readonly Parser<char, string> DataTypeLatLongKeyword = Tok("latlong");
+    private static readonly Parser<char, string> DataTypePercentageKeyword = Tok("percentage");
+
+    private static readonly Parser<char, string> OperationGetKeyword = Tok("Get");
+    private static readonly Parser<char, string> OperationPostKeyword = Tok("post");
+    private static readonly Parser<char, string> OperationPutKeyword = Tok("put");
+    private static readonly Parser<char, string> OperationDeleteKeyword = Tok("delete");
 
     private static Parser<char, T> Parenthesised<T>(Parser<char, T> parser)
-        => parser.Between(LBracket, RBracket);
+        => parser.Between(BracketLeft, BracketRight);
 
     private static readonly Parser<char, NameType> NameIdentifier =
         Tok(from first in Letter
@@ -72,11 +74,11 @@ public static class EntityParser
         select new AttributeType(en, n);
 
     private static readonly Parser<char, DataTypeDetail> DataTypeSyntax =
-        from name in OneOf(FBoolKeyword, FStringKeyword, FDateTimeKeyword, FDateKeyword,
-            FTimeKeyword, FDateTimeOffsetKeyword, FByteKeyword, FEnumKeyword, FCurrencyKeyword, FsEntityKeyword,
-            FmEntityKeyword, FLongKeyword, FDocumentKeyword,
-            FIntKeyword, FImageKeyword, FDoubleKeyword, FLatLongKeyword, FPercentageKeyword)
-        from attrs in KeyValueSyntax.Separated(Comma).Between(LBracket, RBracket)
+        from name in OneOf(DataTypeBoolKeyword, DataTypeStringKeyword, DataTypeDateTimeKeyword, DataTypeDateKeyword,
+            DataTypeTimeKeyword, DataTypeDateTimeOffsetKeyword, DataTypeByteKeyword, DataTypeEnumKeyword, DataTypeCurrencyKeyword, DataTypeSingleEntityKeyword,
+            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword,
+            DataTypeIntKeyword, DataTypeImageKeyword, DataTypeDoubleKeyword, DataTypeLatLongKeyword, DataTypePercentageKeyword)
+        from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight)
         select new DataTypeDetail(name, attrs);
 
     private static readonly Parser<char, string> VersionSyntax =
@@ -85,37 +87,37 @@ public static class EntityParser
         ).Labelled("Version");
 
     internal static readonly Parser<char, VersionedName> EntitySyntax =
-        from kw in EntityKeyword
+        from kw in ObjectEntityKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
 
     internal static readonly Parser<char, VersionedName> TypeSyntax =
-        from kw in TypeKeyword
+        from kw in ObjectRpcTypeKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
 
     internal static readonly Parser<char, VersionedName> DomainSyntax =
-        from kw in DomainKeyword
+        from kw in ObjectDomainKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
 
     internal static readonly Parser<char, VersionedName> EndpointSyntax =
-        from kw in EndpointKeyword
+        from kw in ObjectEndpointKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
 
     internal static readonly Parser<char, VersionedName> EnumSyntax =
-        from kw in EnumKeyword
+        from kw in ObjectEnumKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
 
     internal static readonly Parser<char, VersionedName> FlagSyntax =
-        from kw in FlagKeyword
+        from kw in ObjectFlagKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
@@ -126,7 +128,7 @@ public static class EntityParser
             .Between(Quote);
 
     internal static readonly Parser<char, NonEmptyString> DescriptionSyntax =
-        DescriptionKeyword
+        AttributeDescriptionKeyword
             .Then(Parenthesised(ClearText.Select(s => new NonEmptyString(s))))
             .Labelled("'description(\"<clear text description>\")'");
 
@@ -171,7 +173,7 @@ public static class EntityParser
         ).Labelled("Tenant");
 
     internal static readonly Parser<char, VersionedName> EntityKeySyntax =
-        from kw in EntityKeyKeyword
+        from kw in ObjectEntityKeyKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
@@ -188,7 +190,7 @@ public static class EntityParser
         from k in KeyOwnerSyntax.Before(Comma).Optional()
         from desc in DescriptionSyntax
         from kt in TenantKeyword.Optional()
-        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EntityKeyBuilder(en, k, kt.HasValue, desc, fields);
 
     private static readonly Parser<char, EntityBuilder> EntityParserRule =
@@ -196,7 +198,7 @@ public static class EntityParser
         from en in EntitySyntax
         from co in Colon
         from desc in DescriptionSyntax
-        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EntityBuilder(en, desc, fields);
 
     private static readonly Parser<char, TypeBuilder> TypeParserRule =
@@ -204,7 +206,7 @@ public static class EntityParser
         from en in TypeSyntax
         from co in Colon
         from desc in DescriptionSyntax
-        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new TypeBuilder(en, desc, fields);
 
     private static readonly Parser<char, DomainBuilder> DomainParserRule =
@@ -212,7 +214,7 @@ public static class EntityParser
         from en in DomainSyntax
         from co in Colon
         from desc in DescriptionSyntax
-        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new DomainBuilder(en, desc, fields);
 
     private static readonly Parser<char, OwnerDetail> OwnerSyntax =
@@ -222,7 +224,7 @@ public static class EntityParser
     
     private static readonly Parser<char, string> OperationSyntax =
         from kw in OperationKeyword
-        from op in Parenthesised(OneOf(GetKeyword, PostKeyword, PutKeyword, DeleteKeyword).Between(Quote)).Labelled("Operation Type")
+        from op in Parenthesised(OneOf(OperationGetKeyword, OperationPostKeyword, OperationPutKeyword, OperationDeleteKeyword).Between(Quote)).Labelled("Operation Type")
         select op;
 
     private static readonly Parser<char, string> PathSyntax =
@@ -243,7 +245,7 @@ public static class EntityParser
         from co in Colon
         from o in OwnerSyntax.Before(Comma)
         from desc in DescriptionSyntax
-        from body in EndpointBodySyntax.Between(LBrace, RBrace)
+        from body in EndpointBodySyntax.Between(BraceLeft, BraceRight)
         select new EndpointBuilder(ep,o,desc);
     
     private static readonly Parser<char, EnumBuilder> EnumParserRule =
@@ -251,7 +253,7 @@ public static class EntityParser
         from en in EnumSyntax
         from co in Colon
         from desc in DescriptionSyntax
-        from values in EnumValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        from values in EnumValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EnumBuilder(en, desc, values);
 
     private static readonly Parser<char, FlagBuilder> FlagParserRule =
@@ -259,7 +261,7 @@ public static class EntityParser
         from en in FlagSyntax
         from co in Colon
         from desc in DescriptionSyntax
-        from values in FlagValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(LBrace, RBrace)
+        from values in FlagValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new FlagBuilder(en, desc, values);
 
     public static readonly Func<string, Builder> ParseEntity = input => EntityParserRule.ParseOrThrow(input);
