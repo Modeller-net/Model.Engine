@@ -20,7 +20,7 @@
         <PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
         <PackageReference Include="Serilog.Enrichers.Demystifier" Version="1.0.2" />
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.0-dev-00806" />
-        <PackageReference Include="Serilog.Enrichers.Thread" Version="3.2.0-dev-00756" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
         <PackageReference Include="Serilog.Sinks.Map" Version="1.0.2" />
         <PackageReference Include="Spectre.Console.Analyzer" Version="0.48.1-preview.0.20">
             <PrivateAssets>all</PrivateAssets>
