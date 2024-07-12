@@ -20,6 +20,8 @@ public abstract record Builder;
 
 public record EnumBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<EnumDetail> Enums) : Builder;
 
+public record ServiceBuilder(VersionedName Name, NonEmptyString Summary) : Builder;
+
 public record FlagBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FlagDetail> Enums) : Builder;
 
 public record EntityBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;

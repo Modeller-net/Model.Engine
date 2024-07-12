@@ -40,7 +40,7 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
                         ".flag" => EntityParser.ParseFlag,
                         ".endpoint" => EntityParser.ParseEndpoint,
                         ".key" => EntityParser.ParseEntityKey,
-                        ".type" => EntityParser.ParseType,
+                        ".type" => EntityParser.ParseRpcType,
                         _ => null
                     };
                     if (builder is not null)

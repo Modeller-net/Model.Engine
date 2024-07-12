@@ -27,6 +27,7 @@ public static class EntityParser
     private static readonly Parser<char, string> ObjectEnumKeyword = Tok("enum").Labelled("enum keyword");
     private static readonly Parser<char, string> ObjectFlagKeyword = Tok("flags").Labelled("flag keyword");
     private static readonly Parser<char, string> ObjectEntityKeyKeyword = Tok("key").Labelled("key keyword");
+    private static readonly Parser<char, string> ObjectServiceKeyword = Tok("service").Labelled("service keyword");
 
     private static readonly Parser<char, string> AttributeDescriptionKeyword =
         Tok("description").Labelled("description keyword");
@@ -49,6 +50,8 @@ public static class EntityParser
     private static readonly Parser<char, string> DataTypeDoubleKeyword = Tok("double");
     private static readonly Parser<char, string> DataTypeLatLongKeyword = Tok("latlong");
     private static readonly Parser<char, string> DataTypePercentageKeyword = Tok("percentage");
+    private static readonly Parser<char, string> DataTypeRpcTypeKeyword = Tok("isRPCType");
+    private static readonly Parser<char, string> DataTypeEntityKeyKeyword = Tok("entity_keys");
 
     private static readonly Parser<char, string> OperationGetKeyword = Tok("Get");
     private static readonly Parser<char, string> OperationPostKeyword = Tok("post");
@@ -70,13 +73,21 @@ public static class EntityParser
     private static readonly Parser<char, AttributeType> KeyValueSyntax =
         from en in Tok(OneOf(Letter, Digit, Char('_'))).ManyString()
         from eq in Tok("=").Optional().IgnoreResult()
-        from n in LetterOrDigit.ManyString().Optional()
+        from n in Tok(OneOf(Letter, Digit, Char('_'))).ManyString().Optional()
         select new AttributeType(en, n);
 
     private static readonly Parser<char, DataTypeDetail> DataTypeSyntax =
         from name in OneOf(DataTypeBoolKeyword, DataTypeStringKeyword, DataTypeDateTimeKeyword, DataTypeDateKeyword,
             DataTypeTimeKeyword, DataTypeDateTimeOffsetKeyword, DataTypeByteKeyword, DataTypeEnumKeyword, DataTypeCurrencyKeyword, DataTypeSingleEntityKeyword,
             DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword,
+            DataTypeIntKeyword, DataTypeImageKeyword, DataTypeDoubleKeyword, DataTypeLatLongKeyword, DataTypePercentageKeyword)
+        from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight)
+        select new DataTypeDetail(name, attrs);
+
+    private static readonly Parser<char, DataTypeDetail> DataTypeRpcSyntax =
+        from name in OneOf(DataTypeBoolKeyword, DataTypeStringKeyword, DataTypeDateTimeKeyword, DataTypeDateKeyword,
+            DataTypeTimeKeyword, DataTypeDateTimeOffsetKeyword, DataTypeByteKeyword, DataTypeEnumKeyword, DataTypeCurrencyKeyword, DataTypeSingleEntityKeyword,
+            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword, DataTypeRpcTypeKeyword,DataTypeEntityKeyKeyword,
             DataTypeIntKeyword, DataTypeImageKeyword, DataTypeDoubleKeyword, DataTypeLatLongKeyword, DataTypePercentageKeyword)
         from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight)
         select new DataTypeDetail(name, attrs);
@@ -92,7 +103,7 @@ public static class EntityParser
         from n in NameIdentifier
         select new VersionedName(n, v);
 
-    internal static readonly Parser<char, VersionedName> TypeSyntax =
+    internal static readonly Parser<char, VersionedName> RpcTypeSyntax =
         from kw in ObjectRpcTypeKeyword
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
@@ -115,7 +126,13 @@ public static class EntityParser
         from v in VersionSyntax.Optional()
         from n in NameIdentifier
         select new VersionedName(n, v);
-
+    
+    internal static readonly Parser<char, VersionedName> ServiceSyntax =
+        from kw in ObjectServiceKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
+    
     internal static readonly Parser<char, VersionedName> FlagSyntax =
         from kw in ObjectFlagKeyword
         from v in VersionSyntax.Optional()
@@ -142,6 +159,15 @@ public static class EntityParser
         from n in NameIdentifier
         from colon in Colon
         from dt in DataTypeSyntax.Before(Comma)
+        from s in DescriptionSyntax
+        from c in Comma.Optional()
+        from t in TemporalSyntax.Optional()
+        select new FieldDetail(n, dt, s, t.HasValue);
+
+    internal static readonly Parser<char, FieldDetail> RpcFieldSyntax =
+        from n in NameIdentifier
+        from colon in Colon
+        from dt in DataTypeRpcSyntax.Before(Comma)
         from s in DescriptionSyntax
         from c in Comma.Optional()
         from t in TemporalSyntax.Optional()
@@ -201,12 +227,12 @@ public static class EntityParser
         from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EntityBuilder(en, desc, fields);
 
-    private static readonly Parser<char, TypeBuilder> TypeParserRule =
+    private static readonly Parser<char, TypeBuilder> RpcTypeParserRule =
         from c in SkipComment
-        from en in TypeSyntax
+        from en in RpcTypeSyntax
         from co in Colon
         from desc in DescriptionSyntax
-        from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
+        from fields in RpcFieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new TypeBuilder(en, desc, fields);
 
     private static readonly Parser<char, DomainBuilder> DomainParserRule =
@@ -256,6 +282,13 @@ public static class EntityParser
         from values in EnumValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EnumBuilder(en, desc, values);
 
+    private static readonly Parser<char, ServiceBuilder> ServiceParserRule =
+        from c in SkipComment
+        from en in ServiceSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        select new ServiceBuilder(en, desc);
+
     private static readonly Parser<char, FlagBuilder> FlagParserRule =
         from c in SkipComment
         from en in FlagSyntax
@@ -268,11 +301,13 @@ public static class EntityParser
 
     public static readonly Func<string, Builder> ParseDomain = input => DomainParserRule.ParseOrThrow(input);
 
-    public static readonly Func<string, Builder> ParseType = input => TypeParserRule.ParseOrThrow(input);
+    public static readonly Func<string, Builder> ParseRpcType = input => RpcTypeParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseEntityKey= input => EntityKeyParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseEnum = input => EnumParserRule.ParseOrThrow(input);
+
+    public static readonly Func<string, Builder> ParseService = input => ServiceParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseFlag = input => FlagParserRule.ParseOrThrow(input);
 
