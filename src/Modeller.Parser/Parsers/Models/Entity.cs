@@ -20,8 +20,6 @@ public abstract record Builder;
 
 public record EnumBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<EnumDetail> Enums) : Builder;
 
-public record ServiceBuilder(VersionedName Name, NonEmptyString Summary) : Builder;
-
 public record FlagBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FlagDetail> Enums) : Builder;
 
 public record RpcBuilder(VersionedName Name, NonEmptyString Summary, string? request, string? response, int timeout) : Builder;
@@ -31,6 +29,20 @@ public record EntityBuilder(VersionedName Name, NonEmptyString Summary, IEnumera
 public record TypeBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;
 
 public record DomainBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;
+
+public record ServiceBuilder(VersionedName Name, NonEmptyString Summary, ServiceContent Content) : Builder;
+
+public record ServiceContent(ServiceEnums Enums, ServiceEntities Entities, ServiceReferences References, ServiceCallsRpcs CallsRpcs, ServiceImplementsRpcs ImplementsRpcs);
+
+public record ServiceEnums(IEnumerable<NameType> Enums);
+
+public record ServiceEntities(IEnumerable<NameType> Entities);
+
+public record ServiceReferences(IEnumerable<NameType> References);
+
+public record ServiceCallsRpcs(IEnumerable<NameType> CallsRpcs);
+
+public record ServiceImplementsRpcs(IEnumerable<NameType> ImplementsRpcs);
 
 public record CommandDetail(NameType Name);
 

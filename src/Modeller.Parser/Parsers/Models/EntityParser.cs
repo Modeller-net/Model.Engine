@@ -26,8 +26,8 @@ public static class EntityParser
     private static readonly Parser<char, string> ObjectEndpointKeyword = Tok("endpoint").Labelled("endpoint keyword");
     private static readonly Parser<char, string> ObjectEnumKeyword = Tok("enum").Labelled("enum keyword");
     private static readonly Parser<char, string> ObjectFlagKeyword = Tok("flags").Labelled("flag keyword");
-    private static readonly Parser<char, string> ObjectEntityKeyKeyword = Tok("key").Labelled("key keyword");
     private static readonly Parser<char, string> ObjectServiceKeyword = Tok("service").Labelled("service keyword");
+    private static readonly Parser<char, string> ObjectEntityKeyKeyword = Tok("key").Labelled("key keyword");
     private static readonly Parser<char, string> ObjectRpcKeyword = Tok("rpc").Labelled("rpc keyword");
 
     private static readonly Parser<char, string> AttributeDescriptionKeyword =
@@ -167,6 +167,40 @@ public static class EntityParser
             .IgnoreResult()))
         .Before(SkipWhitespaces);
 
+    private static readonly Parser<char, ServiceEnums> EnumsSyntax =
+        Tok("enums")
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
+            .Between(BraceLeft, BraceRight).Select(x=>new ServiceEnums(x));
+
+    private static readonly Parser<char, ServiceEntities> EntitiesSyntax =
+        Tok("entities")
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
+            .Between(BraceLeft, BraceRight).Select(x => new ServiceEntities(x));
+
+    private static readonly Parser<char, ServiceReferences> ReferencesSyntax =
+        Tok("references")
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
+            .Between(BraceLeft, BraceRight).Select(x => new ServiceReferences(x));
+
+    private static readonly Parser<char, ServiceImplementsRpcs> ImplementsRpcsSyntax =
+        Tok("implements_rpcs")
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
+            .Between(BraceLeft, BraceRight).Select(x => new ServiceImplementsRpcs(x));
+
+    private static readonly Parser<char, ServiceCallsRpcs> CallsRpcsSyntax =
+        Tok("calls_rpcs")
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
+            .Between(BraceLeft, BraceRight).Select(x => new ServiceCallsRpcs(x));
+
+    private static readonly Parser<char, ServiceContent> ContentSyntax =
+        from enums in EnumsSyntax.Optional()
+        from entities in EntitiesSyntax.Optional()
+        from references in ReferencesSyntax.Optional()
+        from callRpcs in CallsRpcsSyntax.Optional()
+        from impls in ImplementsRpcsSyntax.Optional()
+        select new ServiceContent(enums.GetValueOrDefault(), entities.GetValueOrDefault(), references.GetValueOrDefault()
+        , callRpcs.GetValueOrDefault(), impls.GetValueOrDefault());
+
     internal static readonly Parser<char, FieldDetail> FieldSyntax =
         from n in NameIdentifier
         from colon in Colon
@@ -296,13 +330,6 @@ public static class EntityParser
         from values in EnumValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EnumBuilder(en, desc, values);
 
-    private static readonly Parser<char, ServiceBuilder> ServiceParserRule =
-        from c in SkipComment
-        from en in ServiceSyntax
-        from co in Colon
-        from desc in DescriptionSyntax
-        select new ServiceBuilder(en, desc);
-
     private static readonly Parser<char, FlagBuilder> FlagParserRule =
         from c in SkipComment
         from en in FlagSyntax
@@ -310,6 +337,14 @@ public static class EntityParser
         from desc in DescriptionSyntax
         from values in FlagValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new FlagBuilder(en, desc, values);
+    
+    private static readonly Parser<char, ServiceBuilder> ServiceParserRule =
+        from c in SkipComment
+        from en in ServiceSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        from content in ContentSyntax.Between(BraceLeft, BraceRight)
+        select new ServiceBuilder(en, desc, content);
 
     private static readonly Parser<char, RpcBuilder> RpcParserRule =
         from c in SkipComment
