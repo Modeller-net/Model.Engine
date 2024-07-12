@@ -24,6 +24,8 @@ public record ServiceBuilder(VersionedName Name, NonEmptyString Summary) : Build
 
 public record FlagBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FlagDetail> Enums) : Builder;
 
+public record RpcBuilder(VersionedName Name, NonEmptyString Summary, string? request, string? response, int timeout) : Builder;
+
 public record EntityBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;
 
 public record TypeBuilder(VersionedName Name, NonEmptyString Summary, IEnumerable<FieldDetail> Fields) : Builder;

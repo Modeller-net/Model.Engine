@@ -28,6 +28,7 @@ public static class EntityParser
     private static readonly Parser<char, string> ObjectFlagKeyword = Tok("flags").Labelled("flag keyword");
     private static readonly Parser<char, string> ObjectEntityKeyKeyword = Tok("key").Labelled("key keyword");
     private static readonly Parser<char, string> ObjectServiceKeyword = Tok("service").Labelled("service keyword");
+    private static readonly Parser<char, string> ObjectRpcKeyword = Tok("rpc").Labelled("rpc keyword");
 
     private static readonly Parser<char, string> AttributeDescriptionKeyword =
         Tok("description").Labelled("description keyword");
@@ -87,10 +88,10 @@ public static class EntityParser
     private static readonly Parser<char, DataTypeDetail> DataTypeRpcSyntax =
         from name in OneOf(DataTypeBoolKeyword, DataTypeStringKeyword, DataTypeDateTimeKeyword, DataTypeDateKeyword,
             DataTypeTimeKeyword, DataTypeDateTimeOffsetKeyword, DataTypeByteKeyword, DataTypeEnumKeyword, DataTypeCurrencyKeyword, DataTypeSingleEntityKeyword,
-            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword, DataTypeRpcTypeKeyword,DataTypeEntityKeyKeyword,
+            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword, DataTypeRpcTypeKeyword, DataTypeEntityKeyKeyword,
             DataTypeIntKeyword, DataTypeImageKeyword, DataTypeDoubleKeyword, DataTypeLatLongKeyword, DataTypePercentageKeyword)
-        from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight)
-        select new DataTypeDetail(name, attrs);
+        from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight).Optional()
+        select new DataTypeDetail(name, attrs.HasValue ? attrs.Value : []);
 
     private static readonly Parser<char, string> VersionSyntax =
         Try(
@@ -139,11 +140,22 @@ public static class EntityParser
         from n in NameIdentifier
         select new VersionedName(n, v);
 
+    internal static readonly Parser<char, VersionedName> RpcSyntax =
+        from kw in ObjectRpcKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
+
     private static readonly Parser<char, string> ClearText =
         Token(c => c != '"')
             .ManyString()
             .Between(Quote);
 
+    internal static readonly Parser<char, NonEmptyString> DisableApiSyntax = 
+        Tok("disableApi")
+            .Then(Parenthesised(ClearText.Select(s => new NonEmptyString(s))))
+            .Labelled("'disableApi()'");
+    
     internal static readonly Parser<char, NonEmptyString> DescriptionSyntax =
         AttributeDescriptionKeyword
             .Then(Parenthesised(ClearText.Select(s => new NonEmptyString(s))))
@@ -224,6 +236,8 @@ public static class EntityParser
         from en in EntitySyntax
         from co in Colon
         from desc in DescriptionSyntax
+        from comma in Comma.Optional()
+        from da in DisableApiSyntax.Optional()
         from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EntityBuilder(en, desc, fields);
 
@@ -297,6 +311,13 @@ public static class EntityParser
         from values in FlagValueSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new FlagBuilder(en, desc, values);
 
+    private static readonly Parser<char, RpcBuilder> RpcParserRule =
+        from c in SkipComment
+        from en in RpcSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        select new RpcBuilder(en, desc, null, null, 0);
+
     public static readonly Func<string, Builder> ParseEntity = input => EntityParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseDomain = input => DomainParserRule.ParseOrThrow(input);
@@ -310,6 +331,8 @@ public static class EntityParser
     public static readonly Func<string, Builder> ParseService = input => ServiceParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseFlag = input => FlagParserRule.ParseOrThrow(input);
+
+    public static readonly Func<string, Builder> ParseRpc = input => RpcParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseEndpoint = input => EndpointParserRule.ParseOrThrow(input);
 }
