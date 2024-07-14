@@ -34,15 +34,17 @@ public record ServiceBuilder(VersionedName Name, NonEmptyString Summary, Service
 
 public record ServiceContent(ServiceEnums Enums, ServiceEntities Entities, ServiceReferences References, ServiceCallsRpcs CallsRpcs, ServiceImplementsRpcs ImplementsRpcs);
 
-public record ServiceEnums(IEnumerable<NameType> Enums);
+public record ServiceEnums(IEnumerable<NameType> Items);
 
-public record ServiceEntities(IEnumerable<NameType> Entities);
+public record ServiceEntities(IEnumerable<NameType> Items);
 
-public record ServiceReferences(IEnumerable<NameType> References);
+public record ServiceReferences(IEnumerable<ReferenceNames> Items);
 
-public record ServiceCallsRpcs(IEnumerable<NameType> CallsRpcs);
+public record ServiceCallsRpcs(IEnumerable<NameType> Items);
 
-public record ServiceImplementsRpcs(IEnumerable<NameType> ImplementsRpcs);
+public record ServiceImplementsRpcs(IEnumerable<NameType> Items);
+
+public record ReferenceNames(NameType Name, IEnumerable<NameType> References);
 
 public record CommandDetail(NameType Name);
 

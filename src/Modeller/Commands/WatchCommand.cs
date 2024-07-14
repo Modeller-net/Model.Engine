@@ -22,6 +22,27 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
         _cts = new CancellationTokenSource();
 
         var directoryEnumerator = new DirectoryEnumerator();
+        await IterateDirectory(settings, directoryEnumerator);
+
+        var monitorTask = monitor.MonitorAsync(console, settings.DefinitionFolder, _cts.Token);
+        console.MarkupLine("[bold green]Press [red]Ctrl+C[/] to exit.[/]");
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            _cts?.Cancel();
+        };
+
+        try
+        {
+            monitorTask.Wait();
+        }
+        catch (AggregateException ex) when (ex.InnerExceptions.All(e => e is TaskCanceledException)) { }
+
+        console.MarkupLine("[bold yellow]Watcher Command completed.[/]");
+        return 0;
+    }
+    async private Task IterateDirectory(WatchSettings settings, DirectoryEnumerator directoryEnumerator)
+    {
         try
         {
             await foreach (var file in directoryEnumerator.EnumerateFilesAsync(settings.DefinitionFolder, _cts.Token))
@@ -37,10 +58,12 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
                         ".entity" => EntityParser.ParseEntity,
                         ".domain" => EntityParser.ParseDomain,
                         ".enum" => EntityParser.ParseEnum,
-                        ".flag" => EntityParser.ParseFlag,
+                        ".flags" => EntityParser.ParseFlag,
+                        ".service" => EntityParser.ParseService,
                         ".endpoint" => EntityParser.ParseEndpoint,
                         ".key" => EntityParser.ParseEntityKey,
                         ".type" => EntityParser.ParseRpcType,
+                        ".rpc" => EntityParser.ParseRpc,
                         _ => null
                     };
                     if (builder is not null)
@@ -63,22 +86,5 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
         {
             console.WriteLine("Operation was cancelled");
         }
-
-        var monitorTask = monitor.MonitorAsync(console, settings.DefinitionFolder, _cts.Token);
-        console.MarkupLine("[bold green]Press [red]Ctrl+C[/] to exit.[/]");
-        Console.CancelKeyPress += (_, e) =>
-        {
-            e.Cancel = true;
-            _cts?.Cancel();
-        };
-
-        try
-        {
-            monitorTask.Wait();
-        }
-        catch (AggregateException ex) when (ex.InnerExceptions.All(e => e is TaskCanceledException)) { }
-
-        console.MarkupLine("[bold yellow]Watcher Command completed.[/]");
-        return 0;
     }
 }

@@ -30,8 +30,13 @@ public static class EntityParser
     private static readonly Parser<char, string> ObjectEntityKeyKeyword = Tok("key").Labelled("key keyword");
     private static readonly Parser<char, string> ObjectRpcKeyword = Tok("rpc").Labelled("rpc keyword");
 
-    private static readonly Parser<char, string> AttributeDescriptionKeyword =
-        Tok("description").Labelled("description keyword");
+    private static readonly Parser<char, string> ServiceImplementsRpcsKeyword = Tok("implements_rpcs").Labelled("implements_rpcs keyword");
+    private static readonly Parser<char, string> ServiceEntitiesKeyword = Tok("entities").Labelled("entities keyword");
+    private static readonly Parser<char, string> ServiceCallsRpcsKeyword = Tok("calls_rpcs").Labelled("calls_rpcs keyword");
+    private static readonly Parser<char, string> ServiceEnumsKeyword = Tok("enums").Labelled("enums keyword");
+    private static readonly Parser<char, string> ServiceReferencesKeyword = Tok("references").Labelled("references keyword");
+
+    private static readonly Parser<char, string> AttributeDescriptionKeyword = Tok("description").Labelled("description keyword");
 
     private static readonly Parser<char, string> DataTypeBoolKeyword = Tok("boolean");
     private static readonly Parser<char, string> DataTypeStringKeyword = Tok("string");
@@ -46,6 +51,7 @@ public static class EntityParser
     private static readonly Parser<char, string> DataTypeMultipleEntityKeyword = Tok("isMultiple");
     private static readonly Parser<char, string> DataTypeIntKeyword = Tok("integer");
     private static readonly Parser<char, string> DataTypeLongKeyword = Tok("long");
+    private static readonly Parser<char, string> DataTypeULongKeyword = Tok("ulong");
     private static readonly Parser<char, string> DataTypeDocumentKeyword = Tok("document");
     private static readonly Parser<char, string> DataTypeImageKeyword = Tok("image");
     private static readonly Parser<char, string> DataTypeDoubleKeyword = Tok("double");
@@ -70,7 +76,10 @@ public static class EntityParser
 
     private static readonly Parser<char, bool> TemporalSyntax =
         Tok("temporal").Select(_ => true);
-    
+
+    private static readonly Parser<char, bool> SoftDeleteSyntax =
+        Tok("soft_delete").Select(_ => true);
+
     private static readonly Parser<char, AttributeType> KeyValueSyntax =
         from en in Tok(OneOf(Letter, Digit, Char('_'))).ManyString()
         from eq in Tok("=").Optional().IgnoreResult()
@@ -80,7 +89,7 @@ public static class EntityParser
     private static readonly Parser<char, DataTypeDetail> DataTypeSyntax =
         from name in OneOf(DataTypeBoolKeyword, DataTypeStringKeyword, DataTypeDateTimeKeyword, DataTypeDateKeyword,
             DataTypeTimeKeyword, DataTypeDateTimeOffsetKeyword, DataTypeByteKeyword, DataTypeEnumKeyword, DataTypeCurrencyKeyword, DataTypeSingleEntityKeyword,
-            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword,
+            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeULongKeyword, DataTypeDocumentKeyword,
             DataTypeIntKeyword, DataTypeImageKeyword, DataTypeDoubleKeyword, DataTypeLatLongKeyword, DataTypePercentageKeyword)
         from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight)
         select new DataTypeDetail(name, attrs);
@@ -88,7 +97,7 @@ public static class EntityParser
     private static readonly Parser<char, DataTypeDetail> DataTypeRpcSyntax =
         from name in OneOf(DataTypeBoolKeyword, DataTypeStringKeyword, DataTypeDateTimeKeyword, DataTypeDateKeyword,
             DataTypeTimeKeyword, DataTypeDateTimeOffsetKeyword, DataTypeByteKeyword, DataTypeEnumKeyword, DataTypeCurrencyKeyword, DataTypeSingleEntityKeyword,
-            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeDocumentKeyword, DataTypeRpcTypeKeyword, DataTypeEntityKeyKeyword,
+            DataTypeMultipleEntityKeyword, DataTypeLongKeyword, DataTypeULongKeyword, DataTypeDocumentKeyword, DataTypeRpcTypeKeyword, DataTypeEntityKeyKeyword,
             DataTypeIntKeyword, DataTypeImageKeyword, DataTypeDoubleKeyword, DataTypeLatLongKeyword, DataTypePercentageKeyword)
         from attrs in KeyValueSyntax.Separated(Comma).Between(BracketLeft, BracketRight).Optional()
         select new DataTypeDetail(name, attrs.HasValue ? attrs.Value : []);
@@ -168,45 +177,63 @@ public static class EntityParser
         .Before(SkipWhitespaces);
 
     private static readonly Parser<char, ServiceEnums> EnumsSyntax =
-        Tok("enums")
-            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
-            .Between(BraceLeft, BraceRight).Select(x=>new ServiceEnums(x));
+        ServiceEnumsKeyword
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma).Between(BraceLeft, BraceRight))
+            .Select(x=>new ServiceEnums(x));
 
     private static readonly Parser<char, ServiceEntities> EntitiesSyntax =
-        Tok("entities")
-            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
-            .Between(BraceLeft, BraceRight).Select(x => new ServiceEntities(x));
+        ServiceEntitiesKeyword
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma).Between(BraceLeft, BraceRight))
+            .Select(x => new ServiceEntities(x));
 
-    private static readonly Parser<char, ServiceReferences> ReferencesSyntax =
-        Tok("references")
-            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
-            .Between(BraceLeft, BraceRight).Select(x => new ServiceReferences(x));
+    internal static readonly Parser<char,ReferenceNames> ReferenceNameSyntax = 
+        from n in NameIdentifier
+        from c in Colon
+        from i in NameIdentifier
+            .SeparatedAndOptionallyTerminatedAtLeastOnce(Comma)
+            .Between(BraceLeft, BraceRight)
+        select new ReferenceNames(n, i);
+    
+    internal static readonly Parser<char, ServiceReferences> ReferencesSyntax =
+        ServiceReferencesKeyword
+            .Then(ReferenceNameSyntax
+                .SeparatedAndOptionallyTerminatedAtLeastOnce(Comma)
+                .Between(BraceLeft, BraceRight))
+            .Select(x => new ServiceReferences(x));
 
-    private static readonly Parser<char, ServiceImplementsRpcs> ImplementsRpcsSyntax =
-        Tok("implements_rpcs")
-            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
-            .Between(BraceLeft, BraceRight).Select(x => new ServiceImplementsRpcs(x));
+    internal static readonly Parser<char, ServiceImplementsRpcs> ImplementsRpcsSyntax =
+        ServiceImplementsRpcsKeyword
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma).Between(BraceLeft, BraceRight))
+            .Select(x => new ServiceImplementsRpcs(x));
 
     private static readonly Parser<char, ServiceCallsRpcs> CallsRpcsSyntax =
-        Tok("calls_rpcs")
-            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma))
-            .Between(BraceLeft, BraceRight).Select(x => new ServiceCallsRpcs(x));
+        ServiceCallsRpcsKeyword
+            .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma).Between(BraceLeft, BraceRight))
+            .Select(x => new ServiceCallsRpcs(x));
 
     private static readonly Parser<char, ServiceContent> ContentSyntax =
         from enums in EnumsSyntax.Optional()
+        from c1 in Comma.IgnoreResult().Optional()
         from entities in EntitiesSyntax.Optional()
+        from c2 in Comma.IgnoreResult().Optional()
         from references in ReferencesSyntax.Optional()
+        from c3 in Comma.IgnoreResult().Optional()
         from callRpcs in CallsRpcsSyntax.Optional()
+        from c4 in Comma.IgnoreResult().Optional()
         from impls in ImplementsRpcsSyntax.Optional()
-        select new ServiceContent(enums.GetValueOrDefault(), entities.GetValueOrDefault(), references.GetValueOrDefault()
-        , callRpcs.GetValueOrDefault(), impls.GetValueOrDefault());
+        select new ServiceContent(
+            enums.GetValueOrDefault(), 
+            entities.GetValueOrDefault(), 
+            references.GetValueOrDefault(), 
+            callRpcs.GetValueOrDefault(), 
+            impls.GetValueOrDefault());
 
     internal static readonly Parser<char, FieldDetail> FieldSyntax =
         from n in NameIdentifier
         from colon in Colon
         from dt in DataTypeSyntax.Before(Comma)
         from s in DescriptionSyntax
-        from c in Comma.Optional()
+        from c in Comma.IgnoreResult().Optional()
         from t in TemporalSyntax.Optional()
         select new FieldDetail(n, dt, s, t.HasValue);
 

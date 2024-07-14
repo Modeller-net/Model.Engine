@@ -602,7 +602,7 @@ internal sealed class Map7Parser<TToken, T1, T2, T3, T4, T5, T6, T7, R>(
     Parser<TToken, T7> parser7)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [NotNullWhen(true)] out R? result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
