@@ -1,4 +1,5 @@
 ﻿using Modeller.NET.Tool.Core;
+using Modeller.NET.Tool.Generators;
 using Modeller.Parsers.Models;
 
 namespace Modeller.NET.Tool.Commands;
@@ -41,7 +42,8 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
         console.MarkupLine("[bold yellow]Watcher Command completed.[/]");
         return 0;
     }
-    async private Task IterateDirectory(WatchSettings settings, DirectoryEnumerator directoryEnumerator)
+    
+    private async Task IterateDirectory(WatchSettings settings, DirectoryEnumerator directoryEnumerator)
     {
         try
         {
@@ -70,6 +72,15 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
                     {
                         var content = await File.ReadAllTextAsync(file);
                         var x = builder(content);
+                        var text = x switch
+                        {
+                            EntityBuilder entity => new EntityGenerator(entity).Generate(),
+                            EntityKeyBuilder key => new EntityKeyGenerator(key).Generate(),
+                            DomainBuilder domain => new DomainGenerator(domain).Generate(),
+                            _ => string.Empty
+                        };
+                        if(!string.IsNullOrWhiteSpace(text))
+                            console.WriteLine(text);
                     }
                     else
                     {
