@@ -27,15 +27,22 @@ public static class BuilderExtensions
         {
             var fields = eb.Fields.Select(f => new Field(f.Name, f.DataType.Create(), f.Summary));
             var e = Entity.Create(eb.Name.Value, eb.Summary, fields);
-            enterprise.AddEntity(e);
+
+            var current = enterprise.Entities.FirstOrDefault(e => e.Name.Value == eb.Name.Value);
+            if (current is null)
+                enterprise.AddEntity(e);
+            else
+                enterprise.ReplaceEntity(current,e);
         }
         else if (builder is EntityKeyBuilder ek)
         {
-            var fields = ek.Fields.Select(f => new Field(f.Name, f.DataType.Create(), f.Summary));
-            var e = new EntityKey(ek.Name.Value, 1);
-            e = e.Add(fields.ToArray());
-            var entity = enterprise.Entities.FirstOrDefault(ce => ce.Name == e.Name);
+            var entity = enterprise.Entities.FirstOrDefault(ce => ce.Name.Value == ek.Name.Value);
             Debug.Assert(entity != null);
+
+            var owner = ek.Key.HasValue ? ek.Key.Value : null;
+            var fields = ek.Fields.Select(f => new Field(f.Name, f.DataType.Create(), f.Summary));
+            
+            var e = new EntityKey(ek.Name.Value, owner?.Name, fields.ToImmutableList());
             
             var newEntity = entity with { Key = e};
             enterprise.ReplaceEntity(entity,newEntity);

@@ -20,7 +20,6 @@
     
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
-      <ProjectReference Include="..\Modeller.Yaml\Modeller.Yaml.csproj" />
       <ProjectReference Include="..\Names\Names.csproj" />
     </ItemGroup>
 

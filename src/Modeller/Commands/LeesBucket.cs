@@ -10,13 +10,15 @@ namespace Modeller.NET.Tool.Commands;
 /// </summary>
 internal sealed class LeesBucket : IDisposable
 {
+    private readonly Action<Enterprise> _enterpriseUpdated;
     private readonly List<Builder> _processedBuilders;
     private readonly ObservableCollection<Builder> _builders;
     private Enterprise? _enterprise = null;
     private bool _disposed;
     
-    public LeesBucket(IEnumerable<Builder> builders)
+    public LeesBucket(IEnumerable<Builder> builders, Action<Enterprise> enterpriseUpdated)
     {
+        _enterpriseUpdated = enterpriseUpdated;
         _builders = new(builders);
         _processedBuilders = new ();
         _builders.CollectionChanged += OnCollectionChanged;
@@ -41,6 +43,7 @@ internal sealed class LeesBucket : IDisposable
     {
         _processedBuilders.Add(builder);
         _builders.Remove(builder);
+        AnsiConsole.MarkupLine($"  [bold green]{builder.GetType().Name}[/] handled");
     }
 
     private void ProcessChanges()
@@ -73,18 +76,18 @@ internal sealed class LeesBucket : IDisposable
             {
                 Debug.Assert(enterprise is not null);
 
-                AnsiConsole.Write("- Adding {Type} result to Enterprise {Value}  ", builder.GetType().Name, builder.ToString());
+                AnsiConsole.WriteLine($"- Adding {builder.GetType().Name} result to Enterprise");
                 enterprise = builder.Process(enterprise);
 
                 Handled(builder);
             }
-
-            AnsiConsole.WriteLine(".  {Count} remaining", _builders.Count);
         }
 
         alreadyProcessing = false;
         AnsiConsole.WriteLine("processing completed... for now...");
         _enterprise = enterprise;
+        if(_enterprise is not null)
+            _enterpriseUpdated.Invoke(_enterprise);
     }
     
     public void Dispose()

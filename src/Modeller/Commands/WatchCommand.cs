@@ -28,7 +28,7 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
 
         var directoryEnumerator = new DirectoryEnumerator();
         var builders = await IterateDirectory(directoryEnumerator, _cts.Token).ToListAsync();
-        _changes = new(builders);
+        _changes = new(builders, EnterpriseUpdated);
         _changes.Start();
 
         var monitorTask = monitor.MonitorAsync(_changes, console, settings.DefinitionFolder, _cts.Token);
@@ -63,6 +63,11 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
             var o = await processor.ProcessFile(file);
             if (o is not null) yield return o;
         }
+    }
+
+    private void EnterpriseUpdated(Enterprise enterprise)
+    {
+        
     }
 }
 
