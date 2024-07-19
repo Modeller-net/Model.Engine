@@ -26,7 +26,7 @@ public class EntityKeyGenerator
         var e = SyntaxFactory.RecordDeclaration(
                 kind: SyntaxKind.RecordDeclaration,
                 keyword: SyntaxFactory.Token(SyntaxKind.RecordKeyword),
-                identifier: _builder.Name.Name.Value)
+                identifier: _builder.Name.Value.Value)
             .WithParameterList(SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList(ps)))
             .AddModifiers(
                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),

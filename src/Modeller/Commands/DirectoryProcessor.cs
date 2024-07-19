@@ -4,19 +4,9 @@ namespace Modeller.NET.Tool.Commands;
 
 public class DirectoryEnumerator
 {
-    public async IAsyncEnumerable<string> EnumerateFilesAsync(string directory,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+    public IAsyncEnumerable<string> EnumerateFilesAsync(string directory, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(directory))
-            throw new ArgumentException("Directory path cannot be null or whitespace.", nameof(directory));
-
-        if (!Directory.Exists(directory))
-            throw new DirectoryNotFoundException($"Directory not found: {directory}");
-
-        await foreach (var file in EnumerateFilesRecursiveAsync(directory, cancellationToken))
-        {
-            yield return file;
-        }
+        return EnumerateFilesRecursiveAsync(directory, cancellationToken);
     }
 
     private async IAsyncEnumerable<string> EnumerateFilesRecursiveAsync(string directory,

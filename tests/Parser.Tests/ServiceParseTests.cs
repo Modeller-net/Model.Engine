@@ -40,7 +40,7 @@ public class ServiceParseTests
             }
             """;
         var serviceBuilder = (ServiceBuilder)EntityParser.ParseService(fileContent);
-        serviceBuilder.Name.Name.Value.Should().Be("OrganisationService");
+        serviceBuilder.Name.Value.Value.Should().Be("OrganisationService");
         serviceBuilder.Summary.Value.Should().Be("the organisation service");
         serviceBuilder.Content.Entities.Items.Should().HaveCount(13);
         serviceBuilder.Content.References.Items.Should().HaveCount(1);
@@ -70,7 +70,7 @@ public class ServiceParseTests
             }
             """;
         var serviceBuilder = (ServiceBuilder)EntityParser.ParseService(fileContent);
-        serviceBuilder.Name.Name.Value.Should().Be("AuthorisationService");
+        serviceBuilder.Name.Value.Value.Should().Be("AuthorisationService");
         serviceBuilder.Summary.Value.Should().Be("the authorisation service");
         serviceBuilder.Content.Entities.Items.Should().HaveCount(5);
         serviceBuilder.Content.References.Items.Should().HaveCount(2);
@@ -118,7 +118,7 @@ public class ServiceParseTests
             }
             """;
         var serviceBuilder = (ServiceBuilder)EntityParser.ParseService(fileContent);
-        serviceBuilder.Name.Name.Value.Should().Be("DocumentStorageService");
+        serviceBuilder.Name.Value.Value.Should().Be("DocumentStorageService");
         serviceBuilder.Summary.Value.Should().Be("the document storage service");
         serviceBuilder.Content.ImplementsRpcs.Items.Should().HaveCount(1);
         serviceBuilder.Content.ImplementsRpcs.Items.First().Value.Should().Be("FileStorageRPC");

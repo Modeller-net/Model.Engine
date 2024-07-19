@@ -1,6 +1,6 @@
 ﻿namespace Domain;
 
-public record EntityType(NameType Name, NonEmptyString Summary) : DocumentationBase(Summary), IParsable<EntityType>
+public record EntityType(NameType Name, NonEmptyString Summary) : DocumentationBase(Summary)
 {
     public EntityKey? Key { get; init; }
     public EntityAttributesType Attributes { get; init; } = EntityAttributes.None;
@@ -8,10 +8,6 @@ public record EntityType(NameType Name, NonEmptyString Summary) : DocumentationB
     public string? Schema { get; init; }
     public required IEnumerable<Field> Fields { get; init; }
     public IEnumerable<Index> Indexes { get; init; } = [];
-
-    static EntityType IParsable<EntityType>.Parse(string s, IFormatProvider? provider) => throw new NotImplementedException();
-
-    static bool IParsable<EntityType>.TryParse(string? s, IFormatProvider? provider, out EntityType result) => throw new NotImplementedException();
 }
 
 public record EntityAttributesType(long Value)

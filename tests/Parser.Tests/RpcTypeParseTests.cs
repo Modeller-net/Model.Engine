@@ -26,7 +26,7 @@ public class RpcTypeParseTests
             }
             """;
         var rpcTypeFile = (TypeBuilder)EntityParser.ParseRpcType(fileContent);
-        rpcTypeFile.Name.Name.Value.Should().Be("RPCCheckEnrolmentResponse");
+        rpcTypeFile.Name.Value.Value.Should().Be("RPCCheckEnrolmentResponse");
         rpcTypeFile.Summary.Value.Should().Be("Check if Government enrolment exists response");
         rpcTypeFile.Fields.Should().HaveCount(2);
     }

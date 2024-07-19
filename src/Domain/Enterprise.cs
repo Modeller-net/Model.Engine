@@ -32,4 +32,16 @@ public record Enterprise(string Company, NameType Project, NonEmptyString Summar
         get => _enumerations;
         init => _enumerations = value.ToList();
     }
+
+    public void ReplaceEntity(EntityType old, EntityType @new)
+    {
+        _entities.Remove(old);
+        _entities.Add(@new);
+    }
+    
+    public void AddEntity(EntityType entity)
+    {
+        
+        _entities.Add(entity);
+    }
 }

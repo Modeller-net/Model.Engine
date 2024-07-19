@@ -17,8 +17,8 @@ public class EntityKey
 		: fields.Length == 1 ? new(this) { PrimaryKeyFieldList = PrimaryKeyFieldList.Add(fields[0]) }
 		: new(this) { PrimaryKeyFieldList = PrimaryKeyFieldList.AddRange(fields) };
 
-	public required NameType Name { get; init; }
-	public required ushort UniqueId { get; init; }
+	public NameType Name { get; }
+	public ushort UniqueId { get; }
 	public NameType? Owner { get; init; }
 
 	private ImmutableList<Field> PrimaryKeyFieldList { get; init; }

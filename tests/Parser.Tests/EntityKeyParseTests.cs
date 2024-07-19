@@ -11,7 +11,7 @@ public class EntityKeyParseTests
     {
         const string input = "key TestKey";
         var result = EntityParser.EntityKeySyntax.ParseOrThrow(input);
-        result.Name.ToString().Should().Be("TestKey");
+        result.Value.ToString().Should().Be("TestKey");
         result.Version.HasValue.Should().BeFalse();
     }
     
@@ -29,7 +29,7 @@ public class EntityKeyParseTests
                                    """;
         var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
         
-        entity.Name.Name.Value.Should().Be("DeterminationCloseInfo");
+        entity.Name.Value.Value.Should().Be("DeterminationCloseInfo");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a Determination Close Info");
         entity.Key.Value.Name!.Value.Value.Should().Be("Determination");
@@ -52,7 +52,7 @@ public class EntityKeyParseTests
                                    }
                                    """;
         var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
-        entity.Name.Name.Value.Should().Be("IndigenousStatus");
+        entity.Name.Value.Value.Should().Be("IndigenousStatus");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a IndigenousStatus");
         entity.Key.Value.Type.Should().Be("untenanted");
@@ -80,7 +80,7 @@ public class EntityKeyParseTests
                                    }
                                    """;
         var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
-        entity.Name.Name.Value.Should().Be("OrganisationAddress");
+        entity.Name.Value.Value.Should().Be("OrganisationAddress");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a OrganisationAddress");
         entity.Key.Value.Name!.Value.Value.Should().Be("Organisation");
@@ -110,7 +110,7 @@ public class EntityKeyParseTests
                                    }
                                    """;
         var entity = (EntityKeyBuilder)EntityParser.ParseEntityKey(fileContent);
-        entity.Name.Name.Value.Should().Be("Organisation");
+        entity.Name.Value.Value.Should().Be("Organisation");
         entity.Name.Version.HasValue.Should().BeFalse();
         entity.Summary.Value.Should().Be("the unique key for a Organisation");
         entity.Key.HasValue.Should().BeFalse();

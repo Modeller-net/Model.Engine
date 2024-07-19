@@ -12,7 +12,7 @@ public class EntityParseTests
     {
         const string input = "entity TestEntity";
         var result = EntityParser.EntitySyntax.ParseOrThrow(input);
-        result.Name.ToString().Should().Be("TestEntity");
+        result.Value.ToString().Should().Be("TestEntity");
         result.Version.HasValue.Should().BeFalse();
     }
 
@@ -21,7 +21,7 @@ public class EntityParseTests
     {
         const string input = "entity dev10.TestEntity";
         var result = EntityParser.EntitySyntax.ParseOrThrow(input);
-        result.Name.ToString().Should().Be("TestEntity");
+        result.Value.ToString().Should().Be("TestEntity");
         result.Version.Value.Should().Be("dev10");
     }
 
@@ -147,7 +147,7 @@ public class EntityParseTests
 
         var entity = (EntityBuilder)EntityParser.ParseEntity(fileContent);
 
-        entity.Name.Name.ToString().Should().Be("DeterminationCloseInfo");
+        entity.Name.Value.ToString().Should().Be("DeterminationCloseInfo");
         entity.Name.Version.Value.Should().Be("dev10");
         entity.Summary.Value.Should().Be("fields relating to closing a Determination");
         entity.Fields.Should().HaveCount(4);

@@ -32,7 +32,7 @@ public class EnumParseTests
             }
             """;
         var enumFile = (EnumBuilder)EntityParser.ParseEnum(fileContent);
-        enumFile.Name.Name.Value.Should().Be("BillingCycle");
+        enumFile.Name.Value.Value.Should().Be("BillingCycle");
         enumFile.Name.Version.Value.Should().Be("dev10");
         enumFile.Summary.Value.Should().Be("Enum representing the billing cycle");
         enumFile.Enums.Should().HaveCount(5);

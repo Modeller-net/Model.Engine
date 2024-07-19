@@ -35,7 +35,7 @@ public class EndpointParseTests
             """;
 
         var endpoint = (EndpointBuilder)EntityParser.ParseEndpoint(fileContent);
-        endpoint.Name.Name.Value.Should().Be("CentreBalanceReport");
+        endpoint.Name.Value.Value.Should().Be("CentreBalanceReport");
         endpoint.Name.Version.Value.Should().Be("dev10");
         endpoint.Summary.Value.Should().Be("FI-CA balance report for families at a centre.");
         endpoint.Owner.Name.Value.Should().Be("Account");

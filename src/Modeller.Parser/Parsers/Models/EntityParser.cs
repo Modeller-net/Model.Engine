@@ -23,6 +23,7 @@ public static class EntityParser
     private static readonly Parser<char, string> ObjectEntityKeyword = Tok("entity").Labelled("entity keyword");
     private static readonly Parser<char, string> ObjectRpcTypeKeyword = Tok("rpc_type").Labelled("rpc type keyword");
     private static readonly Parser<char, string> ObjectDomainKeyword = Tok("domain").Labelled("domain keyword");
+    private static readonly Parser<char, string> ObjectProjectKeyword = Tok("project").Labelled("project keyword");
     private static readonly Parser<char, string> ObjectEndpointKeyword = Tok("endpoint").Labelled("endpoint keyword");
     private static readonly Parser<char, string> ObjectEnumKeyword = Tok("enum").Labelled("enum keyword");
     private static readonly Parser<char, string> ObjectFlagKeyword = Tok("flags").Labelled("flag keyword");
@@ -107,6 +108,12 @@ public static class EntityParser
             LetterOrDigit.ManyString().Before(Period).Select(s => s)
         ).Labelled("Version");
 
+    internal static readonly Parser<char, VersionedName> ProjectSyntax =
+        from kw in ObjectProjectKeyword
+        from v in VersionSyntax.Optional()
+        from n in NameIdentifier
+        select new VersionedName(n, v);
+
     internal static readonly Parser<char, VersionedName> EntitySyntax =
         from kw in ObjectEntityKeyword
         from v in VersionSyntax.Optional()
@@ -185,6 +192,12 @@ public static class EntityParser
         ServiceEntitiesKeyword
             .Then(NameIdentifier.SeparatedAndOptionallyTerminatedAtLeastOnce(Comma).Between(BraceLeft, BraceRight))
             .Select(x => new ServiceEntities(x));
+
+    internal static readonly Parser<char, KeyValuePair<string,string>> AttributeSyntax =
+        from n in NameIdentifier
+        from c in Colon
+        from v in ClearText
+        select new KeyValuePair<string, string>(n.Value, new NonEmptyString(v).Value);
 
     internal static readonly Parser<char,ReferenceNames> ReferenceNameSyntax = 
         from n in NameIdentifier
@@ -292,6 +305,14 @@ public static class EntityParser
         from fields in FieldSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
         select new EntityKeyBuilder(en, k, kt.HasValue, desc, fields);
 
+    private static readonly Parser<char, ProjectBuilder> ProjectParserRule =
+        from c in SkipComment
+        from en in ProjectSyntax
+        from co in Colon
+        from desc in DescriptionSyntax
+        from attribs in AttributeSyntax.SeparatedAndOptionallyTerminated(Whitespaces).Between(BraceLeft, BraceRight)
+        select new ProjectBuilder(en, desc, attribs.ToDictionary());
+
     private static readonly Parser<char, EntityBuilder> EntityParserRule =
         from c in SkipComment
         from en in EntitySyntax
@@ -379,6 +400,8 @@ public static class EntityParser
         from co in Colon
         from desc in DescriptionSyntax
         select new RpcBuilder(en, desc, null, null, 0);
+
+    public static readonly Func<string, Builder> ParseProject = input => ProjectParserRule.ParseOrThrow(input);
 
     public static readonly Func<string, Builder> ParseEntity = input => EntityParserRule.ParseOrThrow(input);
 

@@ -1,5 +1,5 @@
-﻿using Modeller.NET.Tool.Core;
-using Modeller.NET.Tool.Generators;
+using System.Runtime.CompilerServices;
+using Modeller.NET.Tool.Core;
 using Modeller.Parsers.Models;
 
 namespace Modeller.NET.Tool.Commands;
@@ -8,6 +8,8 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
     : AsyncCommand<WatchSettings>
 {
     private CancellationTokenSource? _cts;
+    private DirectoryInfo _definitionFolder = null!;
+    private LeesBucket _changes;
 
     public override async Task<int> ExecuteAsync(CommandContext context, WatchSettings settings)
     {
@@ -17,15 +19,19 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
             return 1;
         }
 
+        _definitionFolder = new DirectoryInfo(settings.DefinitionFolder);
+
         console.MarkupLine("[bold yellow]Starting Modeller watcher...[/]");
 
-        if(_cts is not null) await _cts.CancelAsync();
+        if (_cts is not null) await _cts.CancelAsync();
         _cts = new CancellationTokenSource();
 
         var directoryEnumerator = new DirectoryEnumerator();
-        await IterateDirectory(settings, directoryEnumerator);
+        var builders = await IterateDirectory(directoryEnumerator, _cts.Token).ToListAsync();
+        _changes = new(builders);
+        _changes.Start();
 
-        var monitorTask = monitor.MonitorAsync(console, settings.DefinitionFolder, _cts.Token);
+        var monitorTask = monitor.MonitorAsync(_changes, console, settings.DefinitionFolder, _cts.Token);
         console.MarkupLine("[bold green]Press [red]Ctrl+C[/] to exit.[/]");
         Console.CancelKeyPress += (_, e) =>
         {
@@ -43,59 +49,52 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
         return 0;
     }
     
-    private async Task IterateDirectory(WatchSettings settings, DirectoryEnumerator directoryEnumerator)
+    private async IAsyncEnumerable<Builder> IterateDirectory(DirectoryEnumerator
+        directoryEnumerator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        try
+        var processor = new FileProcessor();
+        await foreach (var file in directoryEnumerator.EnumerateFilesAsync(_definitionFolder.FullName,
+                           cancellationToken))
         {
-            await foreach (var file in directoryEnumerator.EnumerateFilesAsync(settings.DefinitionFolder, _cts.Token))
-            {
-                if (_cts.Token.IsCancellationRequested)
-                    break;
+            if (cancellationToken.IsCancellationRequested) break;
 
-                try
-                {
-                    console.MarkupLine($"[bold green]Processing file:[/] [blue]{file}[/]");
-                    var builder = Path.GetExtension(file) switch
-                    {
-                        ".entity" => EntityParser.ParseEntity,
-                        ".domain" => EntityParser.ParseDomain,
-                        ".enum" => EntityParser.ParseEnum,
-                        ".flags" => EntityParser.ParseFlag,
-                        ".service" => EntityParser.ParseService,
-                        ".endpoint" => EntityParser.ParseEndpoint,
-                        ".key" => EntityParser.ParseEntityKey,
-                        ".type" => EntityParser.ParseRpcType,
-                        ".rpc" => EntityParser.ParseRpc,
-                        _ => null
-                    };
-                    if (builder is not null)
-                    {
-                        var content = await File.ReadAllTextAsync(file);
-                        var x = builder(content);
-                        var text = x switch
-                        {
-                            EntityBuilder entity => new EntityGenerator(entity).Generate(),
-                            EntityKeyBuilder key => new EntityKeyGenerator(key).Generate(),
-                            DomainBuilder domain => new DomainGenerator(domain).Generate(),
-                            _ => string.Empty
-                        };
-                        if(!string.IsNullOrWhiteSpace(text))
-                            console.WriteLine(text);
-                    }
-                    else
-                    {
-                        console.MarkupLine($"[red]Unsupported file type: {Path.GetExtension(file)}[/]");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    console.MarkupLine($"[red]{ex.Message}[/]");
-                }
-            }
+            console.MarkupLine($"[bold green]Processing file:[/] [blue]{file}[/]");
+
+            var o = await processor.ProcessFile(file);
+            if (o is not null) yield return o;
         }
-        catch (OperationCanceledException)
+    }
+}
+
+internal static class EnterpriseExtensions
+{
+    public static Enterprise FromBuilders(this IAsyncEnumerable<Builder> builders)
+    {
+       return new Enterprise("Company",new("NewBranch"),new("Some description"));
+    }
+}
+
+internal class FileProcessor
+{
+    internal async Task<Builder?> ProcessFile(string file)
+    {
+        var builder = Path.GetExtension(file) switch
         {
-            console.WriteLine("Operation was cancelled");
-        }
+            ".project" => EntityParser.ParseProject,
+            ".entity" => EntityParser.ParseEntity,
+            ".domain" => EntityParser.ParseDomain,
+            ".enum" => EntityParser.ParseEnum,
+            ".flags" => EntityParser.ParseFlag,
+            ".service" => EntityParser.ParseService,
+            ".endpoint" => EntityParser.ParseEndpoint,
+            ".key" => EntityParser.ParseEntityKey,
+            ".type" => EntityParser.ParseRpcType,
+            ".rpc" => EntityParser.ParseRpc,
+            _ => null
+        };
+        if (builder is null) return null;
+
+        var content = await File.ReadAllTextAsync(file);
+        return builder(content);
     }
 }

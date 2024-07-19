@@ -51,6 +51,8 @@ internal sealed record UniqueIdentifierDataType() : DataTypeType("Guid");
 
 internal sealed record LatLongType() : DataTypeType("DbGeography");
 
+internal sealed record CurrencyDataType() : DataTypeType("Money");
+
 internal sealed record ObjectDataType() : DataTypeType("object");
 
 public static class DataType
@@ -58,6 +60,8 @@ public static class DataType
     public static DataTypeType Enum(NonEmptyString enumTypeName) => new EnumDataType(enumTypeName);
 
     public static DataTypeType Bool() => new BoolDataType();
+
+    public static DataTypeType Currency() => new CurrencyDataType();
 
     public static DataTypeType String(MinMaxType? minMax = null, bool unique = false, bool supportUnicode = true) => new StringDataType(minMax, unique, supportUnicode);
 

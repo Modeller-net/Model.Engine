@@ -3,9 +3,12 @@ using System.Reactive.Linq;
 
 namespace Modeller.NET.Tool.Commands;
 
-public class FileSystemMonitor(ILogger<FileSystemMonitor> logger)
+internal sealed class FileSystemMonitor(ILogger<FileSystemMonitor> logger)
 {
-    public async Task MonitorAsync(IAnsiConsole console, string directoryPath, CancellationToken cancellationToken)
+    private readonly FileProcessor _fileProcessor = new();
+
+    public async Task MonitorAsync(LeesBucket changes, IAnsiConsole console, string directoryPath, CancellationToken 
+            cancellationToken)
     {
         if (!Directory.Exists(directoryPath))
         {
@@ -16,20 +19,7 @@ public class FileSystemMonitor(ILogger<FileSystemMonitor> logger)
         var fileSystemWatcher = InitializeFileSystemWatcher(new DirectoryInfo(directoryPath));
         using var subscription = CreateObservables(fileSystemWatcher)
             .Throttle(TimeSpan.FromMilliseconds(100))
-            .Subscribe(evt =>
-            {
-                try
-                {
-                    var e = evt.EventArgs;
-                    console.MarkupLine($"[green]{e.ChangeType}[/] [yellow]{e.FullPath}[/]");
-                    logger.LogInformation("{ChangeType} {FullPath}", e.ChangeType, e.FullPath);
-                }
-                catch (Exception ex)
-                {
-                    console.MarkupLine($"[red]{ex.Message}[/]");
-                    logger.LogError(ex, "An error occurred while processing file system events");
-                }
-            });
+            .Subscribe(OnNext);
 
         fileSystemWatcher.EnableRaisingEvents = true;
 
@@ -46,6 +36,28 @@ public class FileSystemMonitor(ILogger<FileSystemMonitor> logger)
             fileSystemWatcher.EnableRaisingEvents = false;
             console.MarkupLine("[bold yellow]Stopped Modeller watcher[/]");
             logger.LogInformation("Stopped Modeller watcher");
+        }
+
+        return;
+
+        async void OnNext(EventPattern<FileSystemEventArgs> evt)
+        {
+            try
+            {
+                var e = evt.EventArgs;
+                console.MarkupLine($"[green]{e.ChangeType}[/] [yellow]{e.FullPath}[/]");
+
+                var b = await _fileProcessor.ProcessFile(e.FullPath);
+                if(b is not null)
+                    changes.Add(b);
+
+                logger.LogInformation("{ChangeType} {FullPath}", e.ChangeType, e.FullPath);
+            }
+            catch (Exception ex)
+            {
+                console.MarkupLine($"[red]{ex.Message}[/]");
+                logger.LogError(ex, "An error occurred while processing file system events");
+            }
         }
     }
 

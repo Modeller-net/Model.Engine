@@ -19,7 +19,7 @@ public class EntityGenerator
         var ns = SyntaxFactory
             .NamespaceDeclaration(SyntaxFactory.ParseName("Domain"));
 
-        var e = SyntaxFactory.ClassDeclaration(_builder.Name.Name.Value)
+        var e = SyntaxFactory.ClassDeclaration(_builder.Name.Value.Value)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
 
         var p = SyntaxFactory.List<PropertyDeclarationSyntax>();
@@ -31,7 +31,7 @@ public class EntityGenerator
                 .AddAccessorListAccessors(
                     SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                         .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                    SyntaxFactory.AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
                         .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
                 );
             p = p.Add(pds);
