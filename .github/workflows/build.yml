@@ -15,7 +15,7 @@ on:
 
 jobs:
     build:
-        uses: benjamin-hodgson/BuildScripts/.github/workflows/dotnet.yml@main
+        uses: Modeller-net/BuildScripts/.github/workflows/dotnet.yml@main
         with:
             DOCS_FOLDER: Model.Engine.Docs
             # due to a bug in `dotnet format` with `using static`
