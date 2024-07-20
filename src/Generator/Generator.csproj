@@ -1,26 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
-    
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.9.2" />
-        <PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
+        <PackageReference Include="FluentValidation" />
+        <PackageReference Include="McMaster.NETCore.Plugins" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-        <PackageReference Include="Microsoft.OpenApi" Version="1.6.15" />
-        <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.15" />
-        <PackageReference Include="System.Linq" Version="4.3.0" />
-        <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.0.26" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.OpenApi" />
+        <PackageReference Include="Microsoft.OpenApi.Readers" />
+        <PackageReference Include="System.Linq" />
+        <PackageReference Include="System.Linq.Async" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
     </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\Names\Names.csproj" />
     </ItemGroup>
-
 </Project>

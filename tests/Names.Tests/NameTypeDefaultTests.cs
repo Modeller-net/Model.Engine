@@ -1,5 +1,4 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
 
 using Xunit;
 
@@ -11,7 +10,9 @@ public class NameTypeTests
     public void FromString_NullOrWhitespaceInput_ReturnsError()
     {
         // ReSharper disable once AssignNullToNotNullAttribute
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var a = () => NameType.FromString(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         a.Should().Throw<ArgumentException>().WithMessage("A NameType cannot be null or whitespace. (Parameter 'value')");
     }
 

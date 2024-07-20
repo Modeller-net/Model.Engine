@@ -194,7 +194,7 @@ public static partial class Parser
     private static long GetLowerLetterOffsetLong(char c) => c - 'a';
 
     private static readonly Parser<char, Unit> s_fractionalPart
-        = Char('.').Then(Digit.SkipAtLeastOnce());
+        = Char('.').Then(Digit!.SkipAtLeastOnce());
 
     private static readonly Parser<char, Unit> s_optionalFractionalPart
         = s_fractionalPart.Or(Parser<char>.Return(Unit.Value));

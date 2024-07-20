@@ -9,7 +9,7 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
 {
     private CancellationTokenSource? _cts;
     private DirectoryInfo _definitionFolder = null!;
-    private LeesBucket _changes;
+    private LeesBucket _changes = null!;
 
     public override async Task<int> ExecuteAsync(CommandContext context, WatchSettings settings)
     {

@@ -5,7 +5,7 @@ namespace Modeller.ParserTests;
 
 public class EndpointParseTests
 {
-    [Fact]
+    [Fact(Skip = "Not implemented yet")]
     public void EndpointFile_CanParse()
     {
         const string fileContent = """

@@ -1,5 +1,4 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 
 namespace Names.Tests;
 
@@ -16,7 +15,9 @@ public class NonEmptyStringTests
     [Fact]
     public void ShouldThrowArgumentException_WhenValueIsNull()
     {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         Assert.Throws<ArgumentException>(() => new NonEmptyString(null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Fact]

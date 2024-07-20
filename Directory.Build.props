@@ -1,0 +1,24 @@
+﻿<Project>
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+        <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+        <DebugType>embedded</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+
+        <Authors>Allan Nielsen</Authors>
+        <Company>Modeller.Net</Company>
+        <RepositoryType>git</RepositoryType>
+        <Copyright>Copyright © {year} all rights reserved</Copyright>
+        <NeutralLanguage>en-AU</NeutralLanguage>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+</Project>

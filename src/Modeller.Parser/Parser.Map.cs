@@ -271,26 +271,23 @@ public static partial class Parser
 
 internal abstract class MapParserBase<TToken, T> : Parser<TToken, T>
 {
-	internal abstract new MapParserBase<TToken, U> Map<U>(Func<T, U> func);
+	internal new abstract MapParserBase<TToken, U> Map<U>(Func<T, U> func);
 }
 
 internal sealed class Map1Parser<TToken, T1, R>(
     Func<T1, R> func,
     Parser<TToken, T1> parser1) : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
-
-		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
-		if (!success1)
+		var success = parser1.TryParse(ref state, ref expected, out var result1);
+		if (!success)
 		{
 			result = default;
-			return false;
+            return false;
 		}
 
-		result = func(
-			result1
-		);
+		result = func(result1!);
 		return true;
 	}
 
@@ -307,7 +304,7 @@ internal sealed class Map2Parser<TToken, T1, T2, R>(
     Parser<TToken, T2> parser2)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -325,8 +322,8 @@ internal sealed class Map2Parser<TToken, T1, T2, R>(
 		}
 
 		result = func(
-			result1,
-			result2
+			result1!,
+			result2!
 		);
 		return true;
 	}
@@ -346,7 +343,7 @@ internal sealed class Map3Parser<TToken, T1, T2, T3, R>(
     Parser<TToken, T3> parser3)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -371,9 +368,9 @@ internal sealed class Map3Parser<TToken, T1, T2, T3, R>(
 		}
 
 		result = func(
-			result1,
-			result2,
-			result3
+			result1!,
+			result2!,
+			result3!
 		);
 		return true;
 	}
@@ -395,7 +392,7 @@ internal sealed class Map4Parser<TToken, T1, T2, T3, T4, R>(
     Parser<TToken, T4> parser4)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -427,10 +424,10 @@ internal sealed class Map4Parser<TToken, T1, T2, T3, T4, R>(
 		}
 
 		result = func(
-			result1,
-			result2,
-			result3,
-			result4
+			result1!,
+			result2!,
+			result3!,
+			result4!
 		);
 		return true;
 	}
@@ -454,7 +451,7 @@ internal sealed class Map5Parser<TToken, T1, T2, T3, T4, T5, R>(
     Parser<TToken, T5> parser5)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -493,11 +490,11 @@ internal sealed class Map5Parser<TToken, T1, T2, T3, T4, T5, R>(
 		}
 
 		result = func(
-			result1,
-			result2,
-			result3,
-			result4,
-			result5
+			result1!,
+			result2!,
+			result3!,
+			result4!,
+			result5!
 		);
 		return true;
 	}
@@ -523,7 +520,7 @@ internal sealed class Map6Parser<TToken, T1, T2, T3, T4, T5, T6, R>(
     Parser<TToken, T6> parser6)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -569,12 +566,12 @@ internal sealed class Map6Parser<TToken, T1, T2, T3, T4, T5, T6, R>(
 		}
 
 		result = func(
-			result1,
-			result2,
-			result3,
-			result4,
-			result5,
-			result6
+			result1!,
+			result2!,
+			result3!,
+			result4!,
+			result5!,
+			result6!
 		);
 		return true;
 	}
@@ -602,7 +599,7 @@ internal sealed class Map7Parser<TToken, T1, T2, T3, T4, T5, T6, T7, R>(
     Parser<TToken, T7> parser7)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [NotNullWhen(true)] out R? result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -655,13 +652,13 @@ internal sealed class Map7Parser<TToken, T1, T2, T3, T4, T5, T6, T7, R>(
 		}
 
 		result = func(
-			result1,
-			result2,
-			result3,
-			result4,
-			result5,
-			result6,
-			result7
+			result1!,
+			result2!,
+			result3!,
+			result4!,
+			result5!,
+			result6!,
+			result7!
 		);
 		return true;
 	}
@@ -691,7 +688,7 @@ internal sealed class Map8Parser<TToken, T1, T2, T3, T4, T5, T6, T7, T8, R>(
     Parser<TToken, T8> parser8)
     : MapParserBase<TToken, R>
 {
-    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, out R result)
+    public override bool TryParse(ref ParseState<TToken> state, ref PooledList<Expected<TToken>> expected, [MaybeNullWhen(false)] out R result)
 	{
 
 		var success1 = parser1.TryParse(ref state, ref expected, out var result1);
@@ -751,14 +748,14 @@ internal sealed class Map8Parser<TToken, T1, T2, T3, T4, T5, T6, T7, T8, R>(
 		}
 
 		result = func(
-			result1,
-			result2,
-			result3,
-			result4,
-			result5,
-			result6,
-			result7,
-			result8
+			result1!,
+			result2!,
+			result3!,
+			result4!,
+			result5!,
+			result6!,
+			result7!,
+			result8!
 		);
 		return true;
 	}

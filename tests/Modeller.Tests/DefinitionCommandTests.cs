@@ -82,7 +82,9 @@ public class DefinitionCommandTests
         var logger = Substitute.For<ILogger>();
         var settings = new DefinitionSettings
         {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             DefinitionName = null,
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             DefinitionFolder = null,
             Target = "net8.0",
             OutputFolder = "TestOutputFolder",
