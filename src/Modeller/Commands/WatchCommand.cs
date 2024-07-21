@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Modeller.NET.Tool.Core;
+using Modeller.NET.Tool.Generators;
 using Modeller.Parsers.Models;
 
 namespace Modeller.NET.Tool.Commands;
@@ -67,7 +68,11 @@ internal class WatchCommand(IAnsiConsole console, FileSystemMonitor monitor)
 
     private void EnterpriseUpdated(Enterprise enterprise)
     {
-        
+        foreach(var e in enterprise.Entities)
+        {
+            var g = new EntityGenerator(enterprise, e);
+            AnsiConsole.WriteLine(g.Generate());
+        }
     }
 }
 

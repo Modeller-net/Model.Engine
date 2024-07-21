@@ -7,25 +7,29 @@ namespace Modeller.NET.Tool.Generators;
 
 public class EntityGenerator
 {
-    private readonly EntityBuilder _builder;
-
-    public EntityGenerator(EntityBuilder builder)
+    private readonly Enterprise _enterprise;
+    private readonly EntityType _entity;
+    public EntityGenerator(Enterprise enterprise, EntityType entity)
     {
-        _builder = builder;
+        _enterprise = enterprise;
+        _entity = entity;
     }
 
     public string Generate()
     {
-        var ns = SyntaxFactory
-            .NamespaceDeclaration(SyntaxFactory.ParseName("Domain"));
-
-        var e = SyntaxFactory.ClassDeclaration(_builder.Name.Value.Value)
+        var project = SyntaxFactory.IdentifierName(_enterprise.Project.Value);
+        var domain = SyntaxFactory.IdentifierName("Domain");
+        var entities = SyntaxFactory.IdentifierName("Entities");
+        var qualifiedName = SyntaxFactory.QualifiedName(SyntaxFactory.QualifiedName(project, domain),entities);
+        var ns = SyntaxFactory.FileScopedNamespaceDeclaration(qualifiedName);
+ 
+        var e = SyntaxFactory.ClassDeclaration(_entity.Name.Value)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
 
         var p = SyntaxFactory.List<PropertyDeclarationSyntax>();
-        foreach (var f in _builder.Fields)
+        foreach (var f in _entity.Fields)
         {
-            var t = SyntaxFactory.ParseTypeName(f.DataType.DataType);
+            var t = SyntaxFactory.ParseTypeName(f.DataType.Name);
             var pds = SyntaxFactory.PropertyDeclaration(t, f.Name.Value)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                 .AddAccessorListAccessors(

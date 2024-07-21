@@ -58,11 +58,8 @@ internal sealed class LeesBucket : IDisposable
         {
             var builder = _builders.FirstOrDefault(b => b.WhereAllDependenciesMet(_processedBuilders));
             if (builder is null)
-            {
-                //throw new InvalidOperationException("Circular dependency detected or missing dependency.");
-
-                AnsiConsole.WriteLine("- No builder exists without dependencies");
-                break; // wait for the next change as there are no more builders to process
+            {   AnsiConsole.WriteLine("- No builder exists without dependencies");
+                break;
             }
             
             if (builder is ProjectBuilder pb)

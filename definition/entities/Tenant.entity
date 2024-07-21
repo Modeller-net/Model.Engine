@@ -1,0 +1,6 @@
+entity dev10.Tenant : description("A Tenant")
+{
+    Name:
+        string(min=3, max=20),
+        description("Teh tenant name")
+}
