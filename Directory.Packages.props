@@ -24,7 +24,7 @@
         <PackageVersion Include="NSubstitute" Version="5.1.0"/>
 
         <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1"/>
-        <PackageVersion Include="Serilog.Enrichers.ClientInfo" Version="2.0.3"/>
+        <PackageVersion Include="Serilog.Enrichers.ClientInfo" Version="2.1.0"/>
         <PackageVersion Include="Serilog.Enrichers.CorrelationId" Version="3.0.1"/>
         <PackageVersion Include="Serilog.Enrichers.Demystifier" Version="1.0.2"/>
         <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
