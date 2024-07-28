@@ -6,27 +6,33 @@ namespace Modeller.NET.Tool.Generators;
 
 public class EntityKeyGenerator
 {
-    private readonly EntityKeyBuilder _builder;
+    private readonly Enterprise _enterprise;
+    private readonly EntityType _entity;
 
-    public EntityKeyGenerator(EntityKeyBuilder builder)
+    public EntityKeyGenerator(Enterprise enterprise, EntityType entity)
     {
-        _builder = builder;
+        _enterprise = enterprise;
+        _entity = entity;
     }
 
     public string Generate()
     {
-        var ns = SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.ParseName("Domain"));
+        var project = SyntaxFactory.IdentifierName(_enterprise.Project.Value);
+        var domain = SyntaxFactory.IdentifierName("Domain");
+        var entities = SyntaxFactory.IdentifierName("Entities");
+        var qualifiedName = SyntaxFactory.QualifiedName(SyntaxFactory.QualifiedName(project, domain),entities);
+        var ns = SyntaxFactory.FileScopedNamespaceDeclaration(qualifiedName);
 
-        var ps = _builder.Fields
+        var ps = _entity.Key?.PrimaryKeyFieldList
             .Select(f =>
                 SyntaxFactory.Parameter(SyntaxFactory.Identifier(f.Name.Value))
-                    .WithType(SyntaxFactory.ParseTypeName(f.DataType.DataType)))
+                    .WithType(SyntaxFactory.ParseTypeName(f.DataType.Name)))
             .ToList();
 
         var e = SyntaxFactory.RecordDeclaration(
                 kind: SyntaxKind.RecordDeclaration,
                 keyword: SyntaxFactory.Token(SyntaxKind.RecordKeyword),
-                identifier: _builder.Name.Value.Value)
+                identifier: _entity.Name.Value)
             .WithParameterList(SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList(ps)))
             .AddModifiers(
                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),

@@ -5,10 +5,7 @@ namespace Modeller.NET.Tool.Commands;
 
 internal sealed class FileSystemMonitor(ILogger<FileSystemMonitor> logger)
 {
-    private readonly FileProcessor _fileProcessor = new();
-
-    public async Task MonitorAsync(LeesBucket changes, IAnsiConsole console, string directoryPath, CancellationToken 
-            cancellationToken)
+    public async Task MonitorAsync(LeesBucket changes, IAnsiConsole console, string directoryPath, CancellationToken cancellationToken)
     {
         if (!Directory.Exists(directoryPath))
         {
@@ -47,7 +44,7 @@ internal sealed class FileSystemMonitor(ILogger<FileSystemMonitor> logger)
                 var e = evt.EventArgs;
                 console.MarkupLine($"[green]{e.ChangeType}[/] [yellow]{e.FullPath}[/]");
 
-                var b = await _fileProcessor.ProcessFile(e.FullPath);
+                var b = await FileProcessor.ProcessFile(e.FullPath);
                 if(b is not null)
                     changes.Add(b);
 

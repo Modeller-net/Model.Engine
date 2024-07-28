@@ -9,6 +9,7 @@ public class EntityGenerator
 {
     private readonly Enterprise _enterprise;
     private readonly EntityType _entity;
+    
     public EntityGenerator(Enterprise enterprise, EntityType entity)
     {
         _enterprise = enterprise;
@@ -27,6 +28,12 @@ public class EntityGenerator
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
 
         var p = SyntaxFactory.List<PropertyDeclarationSyntax>();
+        
+        if(_entity.Key is not null)
+        {
+            
+        }
+        
         foreach (var f in _entity.Fields)
         {
             var t = SyntaxFactory.ParseTypeName(f.DataType.Name);

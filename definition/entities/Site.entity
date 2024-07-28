@@ -1,0 +1,10 @@
+entity dev10.Site : description("A Site")
+{
+    Name:
+        string(min=3, max=20),
+        description("The site name")
+
+    Number:
+        string(min=2, max=2),
+        description("The site number")
+}

@@ -33,15 +33,17 @@ public record Enterprise(string Company, NameType Project, NonEmptyString Summar
         init => _enumerations = value.ToList();
     }
 
+    public void AddEntity(EntityType entity) => _entities.Add(entity);
     public void ReplaceEntity(EntityType old, EntityType @new)
     {
         _entities.Remove(old);
         _entities.Add(@new);
     }
-    
-    public void AddEntity(EntityType entity)
+
+    public void AddEnumeration(Enumeration en) => _enumerations.Add(en);
+    public void ReplaceEnumeration(Enumeration old, Enumeration @new)
     {
-        
-        _entities.Add(entity);
+        _enumerations.Remove(old);
+        _enumerations.Add(@new);
     }
 }

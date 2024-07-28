@@ -13,9 +13,9 @@ internal sealed class LeesBucket : IDisposable
     private readonly Action<Enterprise> _enterpriseUpdated;
     private readonly List<Builder> _processedBuilders;
     private readonly ObservableCollection<Builder> _builders;
-    private Enterprise? _enterprise = null;
-    private bool _disposed;
-    
+    private Enterprise? _enterprise;
+    private bool _alreadyProcessing;
+
     public LeesBucket(IEnumerable<Builder> builders, Action<Enterprise> enterpriseUpdated)
     {
         _enterpriseUpdated = enterpriseUpdated;
@@ -24,22 +24,13 @@ internal sealed class LeesBucket : IDisposable
         _builders.CollectionChanged += OnCollectionChanged;
     }
 
-    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        ProcessChanges();
-    }
+    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => ProcessChanges();
 
-    public void Start()
-    {
-        if (_builders.Any())
-            ProcessChanges();
-    }
+    public void Start() => ProcessChanges();
 
     public void Add(Builder builder) => _builders.Add(builder);
-    
-    private bool alreadyProcessing = false;
 
-    public void Handled(Builder builder)
+    private void Handled(Builder builder)
     {
         _processedBuilders.Add(builder);
         _builders.Remove(builder);
@@ -48,10 +39,10 @@ internal sealed class LeesBucket : IDisposable
 
     private void ProcessChanges()
     {
-        if (alreadyProcessing) return;
+        if (_alreadyProcessing) return;
 
         AnsiConsole.WriteLine("processing changes...");
-        alreadyProcessing = true;
+        _alreadyProcessing = true;
         
         var enterprise = _enterprise;
         while (_builders.Any())
@@ -66,8 +57,6 @@ internal sealed class LeesBucket : IDisposable
             {
                 AnsiConsole.WriteLine("- Creating Enterprise");
                 enterprise = pb.Process();
-
-                Handled(builder);
             }
             else 
             {
@@ -75,12 +64,11 @@ internal sealed class LeesBucket : IDisposable
 
                 AnsiConsole.WriteLine($"- Adding {builder.GetType().Name} result to Enterprise");
                 enterprise = builder.Process(enterprise);
-
-                Handled(builder);
             }
+            Handled(builder);
         }
 
-        alreadyProcessing = false;
+        _alreadyProcessing = false;
         AnsiConsole.WriteLine("processing completed... for now...");
         _enterprise = enterprise;
         if(_enterprise is not null)
@@ -89,15 +77,6 @@ internal sealed class LeesBucket : IDisposable
     
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (_disposed) return;
-        if (disposing) _builders.CollectionChanged -= OnCollectionChanged;
-
-        _disposed = true;
+        _builders.CollectionChanged -= OnCollectionChanged;
     }
 }
