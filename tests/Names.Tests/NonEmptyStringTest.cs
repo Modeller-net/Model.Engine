@@ -29,7 +29,7 @@ public class NonEmptyStringTests
     [Fact]
     public void ShouldConvertToString_WhenImplicitlyConverted()
     {
-        NonEmptyString nonEmptyString = new NonEmptyString("Test");
+        var nonEmptyString = new NonEmptyString("Test");
 
         string value = nonEmptyString;
 
@@ -39,9 +39,9 @@ public class NonEmptyStringTests
     [Fact]
     public void ShouldConvertFromString_WhenExplicitlyConverted()
     {
-        string value = "Test";
+        var value = "Test";
 
-        NonEmptyString nonEmptyString = (NonEmptyString)value;
+        var nonEmptyString = (NonEmptyString)value;
 
         Assert.Equal("Test", nonEmptyString.Value);
     }

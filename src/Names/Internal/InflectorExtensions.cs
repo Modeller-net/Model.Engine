@@ -57,25 +57,18 @@ internal static partial class InflectorExtensions
     public static string Underscore(this string input) => MyRegex3().Replace(MyRegex2().Replace(MyRegex1().Replace(input, "$1_$2"), "$1_$2"), "_").ToLower();
 
     /// <summary>
-    /// Replaces underscores with dashes in the string
-    /// </summary>
-    /// <param name="underscoredWord"></param>
-    /// <returns></returns>
-    public static string Dasherize(this string underscoredWord) => underscoredWord.Replace('_', '-');
-
-    /// <summary>
     /// Replaces underscores with hyphens in the string
     /// </summary>
     /// <param name="underscoredWord"></param>
     /// <returns></returns>
-    public static string Hyphenate(this string underscoredWord) => Dasherize(underscoredWord);
+    public static string Hyphenate(this string underscoredWord) => underscoredWord.Replace('_', '-');
 
     /// <summary>
     /// Separates the input words with hyphens and all the words are converted to lowercase
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public static string Kebaberize(this string input) => Underscore(input).Dasherize();
+    public static string Kebaberize(this string input) => Underscore(input).Hyphenate();
 
     [GeneratedRegex("(?:^|_| +)(.)")]
     private static partial Regex MyRegex();

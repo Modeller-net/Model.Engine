@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PublishTrimmed>False</PublishTrimmed>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <PackAsTool>True</PackAsTool>
+        <ToolCommandName>model</ToolCommandName>
+        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="McMaster.NETCore.Plugins" />
+        <PackageReference Include="Microsoft.Extensions.Logging" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Enrichers.ClientInfo" />
+        <PackageReference Include="Serilog.Enrichers.Demystifier" />
+        <PackageReference Include="Serilog.Enrichers.Environment" />
+        <PackageReference Include="Serilog.Enrichers.Thread" />
+        <PackageReference Include="Serilog.Sinks.Map" />
+        <PackageReference Include="Spectre.Console.Analyzer" >
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Spectre.Console.Cli" />
+        <PackageReference Include="Spectre.Console.Json" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Model.Contracts\Model.Contracts.csproj" />
+      <ProjectReference Include="..\Model.Domain\Model.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

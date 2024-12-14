@@ -1,44 +1,47 @@
 <Project>
-    <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-        <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-        <AspnetVersion>8.0.7</AspnetVersion>
-        <MicrosoftExtensionsVersion>8.2.0</MicrosoftExtensionsVersion>
-        <EfVersion>8.0.7</EfVersion>
-        <RuntimeVersion>8.0.7</RuntimeVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageVersion Include="BenchmarkDotNet" Version="0.13.12"/>
-        <PackageVersion Include="coverlet.collector" Version="6.0.2"/>
-        <PackageVersion Include="ErrorOr" Version="2.0.1"/>
-        <PackageVersion Include="FluentAssertions" Version="6.12.0"/>
-        <PackageVersion Include="FluentValidation" Version="11.9.2"/>
-        <PackageVersion Include="JetBrains.Annotations" Version="2024.2.0" />
-        <PackageVersion Include="McMaster.NETCore.Plugins" Version="1.4.0"/>
-
-        <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0"/>
-        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1"/>
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0"/>
-        <PackageVersion Include="Microsoft.OpenApi" Version="1.6.15"/>
-        <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.6.15"/>
-        <PackageVersion Include="NSubstitute" Version="5.1.0"/>
-
-        <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1"/>
-        <PackageVersion Include="Serilog.Enrichers.ClientInfo" Version="2.0.3"/>
-        <PackageVersion Include="Serilog.Enrichers.CorrelationId" Version="3.0.1"/>
-        <PackageVersion Include="Serilog.Enrichers.Demystifier" Version="1.0.2"/>
-        <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
-        <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
-        <PackageVersion Include="Serilog.Sinks.Map" Version="2.0.0"/>
-        <PackageVersion Include="Spectre.Console" Version="0.49.1"/>
-        <PackageVersion Include="Spectre.Console.Analyzer" Version="0.49.1"/>
-        <PackageVersion Include="Spectre.Console.Cli" Version="0.49.1"/>
-        <PackageVersion Include="Spectre.Console.Json" Version="0.49.1"/>
-        <PackageVersion Include="System.Linq" Version="4.3.0"/>
-        <PackageVersion Include="System.Linq.Async" Version="6.0.1"/>
-        <PackageVersion Include="System.Reactive" Version="6.0.1"/>
-        <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.0.26"/>
-        <PackageVersion Include="xunit" Version="2.9.0"/>
-        <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <AspnetVersion>8.0.7</AspnetVersion>
+    <MicrosoftExtensionsVersion>8.2.0</MicrosoftExtensionsVersion>
+    <EfVersion>8.0.7</EfVersion>
+    <RuntimeVersion>8.0.7</RuntimeVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="ErrorOr" Version="2.0.1" />
+    <PackageVersion Include="FluentAssertions" Version="7.0.0" />
+    <PackageVersion Include="FluentValidation" Version="11.9.2" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2024.3.0" />
+    <PackageVersion Include="McMaster.NETCore.Plugins" Version="1.4.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="1.6.15" />
+    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.6.15" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Enrichers.ClientInfo" Version="2.1.2" />
+    <PackageVersion Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.Demystifier" Version="1.0.3" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Map" Version="2.0.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.49.1" />
+    <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.49.1" />
+    <PackageVersion Include="Spectre.Console.Json" Version="0.49.1" />
+    <PackageVersion Include="System.Linq" Version="4.3.0" />
+    <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
+    <PackageVersion Include="System.Reactive" Version="6.0.1" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="21.1.7" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="21.1.7" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.1.7" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageVersion Include="YamlDotNet" Version="16.2.1" />
+  </ItemGroup>
 </Project>

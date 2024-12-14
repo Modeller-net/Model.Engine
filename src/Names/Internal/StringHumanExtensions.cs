@@ -18,9 +18,7 @@ internal static class StringHumanExtensions
 
     private static string FromUnderscoreDashSeparatedWords(string input)
     {
-        return string.Join(" ", input.Split([
-            '_', '-'
-        ]));
+        return string.Join(" ", input.Split('_', '-'));
     }
 
     private static string FromPascalCase(string input)
@@ -32,8 +30,7 @@ internal static class StringHumanExtensions
                 ? match.Value
                 : match.Value.ToLower()));
 
-        if (result.Replace(" ", "").ToCharArray().All(char.IsUpper) &&
-            result.Contains(' '))
+        if (result.Replace(" ", "").ToCharArray().All(char.IsUpper) && result.Contains(' '))
         {
             result = result.ToLower();
         }
